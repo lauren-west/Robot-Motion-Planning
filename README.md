@@ -1,2 +1,2 @@
-# Lab00
-Robot Motion Planning
+Private Repo for Robot Motion Planning course ENGR206
+
