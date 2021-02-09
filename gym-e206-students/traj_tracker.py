@@ -17,6 +17,7 @@ class TrajectoryTracker():
   traj_tracked = False
   traj = []
 
+
   def __init__(self, traj):
     self.current_point_to_track = 0
     self.traj = traj
@@ -65,7 +66,58 @@ class PointTracker():
           desired_state (list of floats): The desired Time, X, Y, Theta (s, m, m, rad).
           current_state (list of floats): The current Time, X, Y, Theta (s, m, m, rad).
     """
+    # In order to be stable, our proportional constants should follow:
+    # kp > 0
+    # kb < 0
+    # ka - kp > 0
+
+    kp = 1
+    kb = -1
+    ka = 2
+    
+    # Constants to get velocities and torques
+    ROBOT_BODY_LENGTH = 1  # In m
+    MAGIC_CONSTANT = 1  # Used to convert to torque, will get sucked up in gain
+
+    # Extract theta, x, y
+    theta = current_state[3]
+    x = current_state[1]
+    y = current_state[2]
+
+    # Extract the desired theta, x, y
+    theta_des = desired_state[3]
+    x_des = desired_state[1]
+    y_des = desired_state[2]
+    
+    # Covert Cartesian coordinates to polar coordinates
+    p = math.sqrt(x**2 + y**2)
+    a = -theta + math.atan2(y, x)
+    b = -theta - a + theta_des
+    p_des = math.sqrt(x_des**2 + y_des**2)
+
+    # Check to see if we are within tolerance of point being tracked
+    if abs(theta_des - theta) <= MIN_ANG_TO_POINT and abs(p_des - p) <= MIN_DIST_TO_POINT:
+      self.traj_tracked = True
+
+    # Use the control law to get forward velocity and angular velocity of vehicle
+    if a >= -math.pi/2 or a <= math.pi/2:
+      v = kp * p
+      w = ka * a + kb * b
+    else:
+      a = -theta + math.atan2(-y, -x)
+      b = -theta - a - theta_des
+      v = -kp * p
+      w = ka * a + kb * b
+
+    # Get the angular velocity of the individual wheels
+    angVelLeft = 0.5*(w - (v/ROBOT_BODY_LENGTH))
+    angVelRight = w - angVelLeft
+    
+    # Get torques for each wheel
+    leftTorque = angVelLeft * MAGIC_CONSTANT
+    rightTorque = angVelRight * MAGIC_CONSTANT
+
     # zero all of action
-    action = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
+    action = [leftTorque, rightTorque, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
     
     return action
