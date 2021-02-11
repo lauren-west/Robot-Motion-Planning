@@ -12,7 +12,7 @@ def main():
   current_state, desired_state, objects, walls = create_motion_planning_problem()
   #desired_traj = construct_dubins_traj(current_state, desired_state)
   desired_traj = [desired_state]
-  plot_traj(desired_traj, desired_traj, objects, walls)
+  #plot_traj(desired_traj, current_state, objects, walls) ##LAB00
   
   # Construct an environment
   env = gym.make("fetch-v0") # <-- this we need to create
@@ -30,6 +30,7 @@ def main():
   observation = [0,0,0,0,0]
   actual_traj = []
   while not traj_tracker.is_traj_tracked():
+      #write some logic for is tracked to help to go from point to point for our plot
       current_state = [current_time_stamp, observation[0], observation[1], observation[2]]
       desired_state = traj_tracker.get_traj_point_to_track(current_state)
       action = controller.point_tracking_control(desired_state, current_state)

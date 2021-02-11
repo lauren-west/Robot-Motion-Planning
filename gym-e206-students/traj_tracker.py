@@ -77,7 +77,6 @@ class PointTracker():
     
     # Constants to get velocities and torques
     ROBOT_BODY_LENGTH = 1  # In m
-    MAGIC_CONSTANT = 1  # Used to convert to torque, will get sucked up in gain
 
     # Extract theta, x, y
     theta = current_state[3]
@@ -90,34 +89,29 @@ class PointTracker():
     y_des = desired_state[2]
     
     # Covert Cartesian coordinates to polar coordinates
-    p = math.sqrt(x**2 + y**2)
-    a = -theta + math.atan2(y, x)
-    b = -theta - a + theta_des
-    p_des = math.sqrt(x_des**2 + y_des**2)
+    p = math.sqrt((x_des-x)**2 + (y_des-y)**2)
+    a = angle_diff(-theta + math.atan2((y_des-y), (x_des-x)))
+    b = angle_diff(-theta - a)
 
     # Check to see if we are within tolerance of point being tracked
-    if abs(theta_des - theta) <= MIN_ANG_TO_POINT and abs(p_des - p) <= MIN_DIST_TO_POINT:
+    if (abs(angle_diff(theta_des - theta)) <= MIN_ANG_TO_POINT) and (abs(p) <= MIN_DIST_TO_POINT):
       self.traj_tracked = True
 
     # Use the control law to get forward velocity and angular velocity of vehicle
-    if a >= -math.pi/2 or a <= math.pi/2:
+    if a >= -math.pi/2 or a <= math.pi/2: # how are we declaring a in the else statement if we are using a as the iF???
       v = kp * p
-      w = ka * a + kb * b
+      w = (ka * a) + (kb * b)
     else:
-      a = -theta + math.atan2(-y, -x)
-      b = -theta - a - theta_des
+      a = angle_diff(-theta + math.atan2(-(y_des-y), -(x_des-x)))
+      b = angle_diff(-theta - a)
       v = -kp * p
-      w = ka * a + kb * b
+      w = (ka * a) + (kb * b)
 
     # Get the angular velocity of the individual wheels
-    angVelLeft = 0.5*(w - (v/ROBOT_BODY_LENGTH))
+    angVelLeft = 0.5 * (w - (v/ROBOT_BODY_LENGTH))
     angVelRight = w - angVelLeft
-    
-    # Get torques for each wheel
-    leftTorque = angVelLeft * MAGIC_CONSTANT
-    rightTorque = angVelRight * MAGIC_CONSTANT
 
     # zero all of action
-    action = [leftTorque, rightTorque, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
+    action = [angVelRight, angVelLeft, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
     
     return action
