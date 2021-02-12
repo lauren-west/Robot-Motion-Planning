@@ -10,10 +10,10 @@ from traj_tracker import *
 def main():
   # Create a motion planning problem and solve it
   current_state, desired_state, objects, walls = create_motion_planning_problem()
-  #desired_traj = construct_dubins_traj(current_state, desired_state)
+  #desired_traj = construct_dubins_traj(current_state, desired_state) #as in Lab00
   desired_traj = [desired_state]
   #plot_traj(desired_traj, current_state, objects, walls) ##LAB00
-  
+
   # Construct an environment
   env = gym.make("fetch-v0") # <-- this we need to create
   env.set_parameters(TIME_STEP_SIZE, objects)

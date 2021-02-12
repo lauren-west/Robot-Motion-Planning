@@ -30,8 +30,13 @@ class TrajectoryTracker():
         Returns:
           desired_state (list of floats: The desired state to track - Time, X, Y, Theta (s, m, m, rad).
     """
-    self.current_point_to_track = 0
-
+    current_time = current_state[0]
+    
+    for point in self.traj:
+      if current_time + TIME_STEP_SIZE == point[0]:
+        self.current_point_to_track = point
+        break
+    
     return self.traj[self.current_point_to_track]
   
   def print_traj(self):
@@ -72,8 +77,8 @@ class PointTracker():
     # ka - kp > 0
 
     kp = 1
-    kb = -1
-    ka = 2
+    kb = -5
+    ka = 10
     
     # Constants to get velocities and torques
     ROBOT_BODY_LENGTH = 1  # In m
@@ -107,11 +112,18 @@ class PointTracker():
       v = -kp * p
       w = (ka * a) + (kb * b)
 
+
     # Get the angular velocity of the individual wheels
     angVelLeft = 0.5 * (w - (v/ROBOT_BODY_LENGTH))
     angVelRight = w - angVelLeft
+
+
+    # print(angVelRight)
+
+    print(current_state)
 
     # zero all of action
     action = [angVelRight, angVelLeft, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
     
     return action
+  
