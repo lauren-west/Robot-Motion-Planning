@@ -76,12 +76,13 @@ class PointTracker():
     # kb < 0
     # ka - kp > 0
 
-    kp = 1
-    kb = -5
-    ka = 10
+    kp = 50
+    kb = -3
+    ka = 55
     
     # Constants to get velocities and torques
     ROBOT_BODY_LENGTH = 1  # In m
+    L = 1
 
     # Extract theta, x, y
     theta = current_state[3]
@@ -96,7 +97,7 @@ class PointTracker():
     # Covert Cartesian coordinates to polar coordinates
     p = math.sqrt((x_des-x)**2 + (y_des-y)**2)
     a = angle_diff(-theta + math.atan2((y_des-y), (x_des-x)))
-    b = angle_diff(-theta - a)
+    b = angle_diff(-theta + a)
 
     # Check to see if we are within tolerance of point being tracked
     if (abs(angle_diff(theta_des - theta)) <= MIN_ANG_TO_POINT) and (abs(p) <= MIN_DIST_TO_POINT):
@@ -114,16 +115,18 @@ class PointTracker():
 
 
     # Get the angular velocity of the individual wheels
-    angVelLeft = 0.5 * (w - (v/ROBOT_BODY_LENGTH))
-    angVelRight = w - angVelLeft
+    # angVelLeft = 0.5 * (w - (v/ROBOT_BODY_LENGTH))
+    # angVelRight = w - angVelLeft
 
+    right_wheel_torque = w*L + v
+    left_wheel_torque = -w*L + v
 
     # print(angVelRight)
 
     print(current_state)
 
     # zero all of action
-    action = [angVelRight, angVelLeft, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
+    action = [right_wheel_torque, left_wheel_torque, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
     
     return action
   
