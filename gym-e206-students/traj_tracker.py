@@ -119,12 +119,8 @@ class PointTracker():
       v = 0
       w = k_rots * (theta_des-theta_des)
 
-    # w = -(1.57*10)/5
-    # v = 7.0
-    # print(current_state)
-
-    right_wheel_torque = w*L + v
-    left_wheel_torque = -w*L + v
+    right_wheel_torque = w * L + v
+    left_wheel_torque = -w * L + v
 
     # zero all of action
     action = [right_wheel_torque, left_wheel_torque, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
