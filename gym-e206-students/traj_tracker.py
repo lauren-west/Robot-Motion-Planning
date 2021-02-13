@@ -5,7 +5,7 @@ from traj_planner_utils import *
 
 TIME_STEP_SIZE = 0.01 #s
 LOOK_AHEAD_TIME = 1.0 #s
-MIN_DIST_TO_POINT = 0.1 #m
+MIN_DIST_TO_POINT = 0.50 #m
 MIN_ANG_TO_POINT = 0.50 #rad
 
 class TrajectoryTracker():
@@ -102,8 +102,7 @@ class PointTracker():
 
     # Check to see if we are within tolerance of point being tracked
     if (abs(a) <= MIN_ANG_TO_POINT) and (abs(p) <= MIN_DIST_TO_POINT):
-      self.traj_tracked = True
-
+      PointTracker.traj_tracked = True
   
     if p > 0.1:
       # Use the control law to get forward velocity and angular velocity of vehicle
