@@ -6,7 +6,7 @@ from traj_planner_utils import *
 TIME_STEP_SIZE = 0.01 #s
 LOOK_AHEAD_TIME = 1.0 #s
 MIN_DIST_TO_POINT = 0.1 #m
-MIN_ANG_TO_POINT = 0.10 #rad
+MIN_ANG_TO_POINT = 0.50 #rad
 
 class TrajectoryTracker():
   """ A class to hold the functionality for tracking trajectories.
@@ -97,10 +97,10 @@ class PointTracker():
     # Covert Cartesian coordinates to polar coordinates
     p = math.sqrt((x_des-x)**2 + (y_des-y)**2)
     a = angle_diff(-theta + math.atan2((y_des-y), (x_des-x)))
-    b = angle_diff(-theta + a)
+    b = angle_diff(angle_diff(-theta - a) + theta_des)
 
     # Check to see if we are within tolerance of point being tracked
-    if (abs(angle_diff(theta_des - theta)) <= MIN_ANG_TO_POINT) and (abs(p) <= MIN_DIST_TO_POINT):
+    if (abs(a) <= MIN_ANG_TO_POINT) and (abs(p) <= MIN_DIST_TO_POINT):
       self.traj_tracked = True
 
     # Use the control law to get forward velocity and angular velocity of vehicle
@@ -109,21 +109,12 @@ class PointTracker():
       w = (ka * a) + (kb * b)
     else:
       a = angle_diff(-theta + math.atan2(-(y_des-y), -(x_des-x)))
-      b = angle_diff(-theta - a)
+      b = angle_diff(angle_diff(-theta - a) - theta_des)
       v = -kp * p
       w = (ka * a) + (kb * b)
 
-
-    # Get the angular velocity of the individual wheels
-    # angVelLeft = 0.5 * (w - (v/ROBOT_BODY_LENGTH))
-    # angVelRight = w - angVelLeft
-
     right_wheel_torque = w*L + v
     left_wheel_torque = -w*L + v
-
-    # print(angVelRight)
-
-    print(current_state)
 
     # zero all of action
     action = [right_wheel_torque, left_wheel_torque, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]

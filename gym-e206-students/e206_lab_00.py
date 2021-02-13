@@ -12,7 +12,7 @@ def main():
   current_state, desired_state, objects, walls = create_motion_planning_problem()
   #desired_traj = construct_dubins_traj(current_state, desired_state) #as in Lab00
   desired_traj = [desired_state]
-  #plot_traj(desired_traj, current_state, objects, walls) ##LAB00
+  #plot_traj(desired_traj, [current_state], objects, walls) ##LAB00
 
   # Construct an environment
   env = gym.make("fetch-v0") # <-- this we need to create
@@ -45,7 +45,7 @@ def main():
   
 def create_motion_planning_problem():
   current_state =  [0, 0, 0, 0]
-  desired_state = [2, 2, 0, 0] #[20, 2.5, -2.5, 1.57]
+  desired_state =  [10, 2, 0, 0] #[20, 2.5, -2.5, 1.57]
   maxR = 8
   walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
   objects = [[4, 0, 1.0], [-2, -3, 1.5]]
