@@ -32,7 +32,7 @@ def main():
   while not traj_tracker.is_traj_tracked():
       #write some logic for is tracked to help to go from point to point for our plot
       current_state = [current_time_stamp, observation[0], observation[1], observation[2]]
-      desired_state = traj_tracker.get_traj_point_to_track(current_state)
+      #desired_state = desired_state #traj_tracker.get_traj_point_to_track(current_state)
       action = controller.point_tracking_control(desired_state, current_state)
       observation, reward, done, dummy = env.step(action)
       env.render('human')
@@ -45,7 +45,7 @@ def main():
   
 def create_motion_planning_problem():
   current_state =  [0, 0, 0, 0]
-  desired_state =  [10, 2, 0, 0] #[20, 2.5, -2.5, 1.57]
+  desired_state =  [10, 2, 2, math.pi/2] #[20, 2.5, -2.5, 1.57]
   maxR = 8
   walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
   objects = [[4, 0, 1.0], [-2, -3, 1.5]]

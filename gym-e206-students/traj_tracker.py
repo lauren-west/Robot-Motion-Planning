@@ -76,13 +76,14 @@ class PointTracker():
     # kb < 0
     # ka - kp > 0
 
-    kp = 50
+    kp = 10
     kb = -3
-    ka = 55
+    ka = 15
+    k_rots= 2
     
     # Constants to get velocities and torques
-    ROBOT_BODY_LENGTH = 1  # In m
-    L = 1
+    #ROBOT_BODY_LENGTH = 1  # 
+    L = 0.35
 
     # Extract theta, x, y
     theta = current_state[3]
@@ -103,15 +104,24 @@ class PointTracker():
     if (abs(a) <= MIN_ANG_TO_POINT) and (abs(p) <= MIN_DIST_TO_POINT):
       self.traj_tracked = True
 
-    # Use the control law to get forward velocity and angular velocity of vehicle
-    if a >= -math.pi/2 or a <= math.pi/2: # how are we declaring a in the else statement if we are using a as the iF???
-      v = kp * p
-      w = (ka * a) + (kb * b)
+  
+    if p > 0.1:
+      # Use the control law to get forward velocity and angular velocity of vehicle
+      if a >= -math.pi/2 and a <= math.pi/2: # how are we declaring a in the else statement if we are using a as the iF???
+        v = kp * p
+        w = (ka * a) + (kb * b)
+      else:
+        a = angle_diff(-theta + math.atan2(-(y_des-y), -(x_des-x)))
+        b = angle_diff(angle_diff(-theta - a) - theta_des)
+        v = -kp * p
+        w = (ka * a) + (kb * b)
     else:
-      a = angle_diff(-theta + math.atan2(-(y_des-y), -(x_des-x)))
-      b = angle_diff(angle_diff(-theta - a) - theta_des)
-      v = -kp * p
-      w = (ka * a) + (kb * b)
+      v = 0
+      w = k_rots * (theta_des-theta_des)
+
+    # w = -(1.57*10)/5
+    # v = 7.0
+    # print(current_state)
 
     right_wheel_torque = w*L + v
     left_wheel_torque = -w*L + v
