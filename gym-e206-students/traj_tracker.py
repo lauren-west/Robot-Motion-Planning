@@ -5,21 +5,26 @@ from traj_planner_utils import *
 
 TIME_STEP_SIZE = 0.01 #s
 LOOK_AHEAD_TIME = 1.0 #s
-MIN_DIST_TO_POINT = 0.50 #m
-MIN_ANG_TO_POINT = 0.50 #rad
+MIN_DIST_TO_POINT = 0.1 #m
+MIN_ANG_TO_POINT = 0.5 #rad
 
 class TrajectoryTracker():
   """ A class to hold the functionality for tracking trajectories.
       Arguments:
         traj (list of lists): A list of traj points Time, X, Y, Theta (s, m, m, rad).
   """
-  current_point_to_track = 0
+  current_point_to_track = (0, 0 ,0 ,0)
   traj_tracked = False
   traj = []
 
 
   def __init__(self, traj):
-    self.current_point_to_track = 0
+    self.current_point_to_track = (0, 0 ,0 ,0)
+    self.traj = traj
+    self.traj_tracked = False
+
+  def reset(self):
+    self.current_point_to_track = (0, 0 ,0 ,0)
     self.traj = traj
     self.traj_tracked = False
       
@@ -31,13 +36,15 @@ class TrajectoryTracker():
           desired_state (list of floats: The desired state to track - Time, X, Y, Theta (s, m, m, rad).
     """
     current_time = current_state[0]
+    prior_point = [0, 0 ,0 ,0]
     
     for point in self.traj:
-      if current_time + TIME_STEP_SIZE == point[0]:
+      if prior_point[0] < current_time + TIME_STEP_SIZE * 100 < point[0]:
         self.current_point_to_track = point
         break
+      prior_point = point
     
-    return self.traj[self.current_point_to_track]
+    return self.current_point_to_track
   
   def print_traj(self):
     """ Print the trajectory points.
@@ -52,12 +59,23 @@ class TrajectoryTracker():
           traj_tracked (boolean): True if traj has been tracked.
     """
     return self.traj_tracked
+
     
 class PointTracker():
   """ A class to determine actions (motor control signals) for driving a robot to a position.
   """
   def __init__(self):
-    pass
+    self.isDone = False
+
+  def reset(self):
+    self.isDone = False
+
+  def is_Done(self):
+    """ Return true if the traj is tracked.
+        Returns:
+          is_Done (boolean): True if traj has been tracked.
+    """
+    return self.isDone
 
   def get_dummy_action(self, x_des, x):
     """ Return a dummy action for now
@@ -101,9 +119,10 @@ class PointTracker():
     b = angle_diff(angle_diff(-theta - a) + theta_des)
 
     # Check to see if we are within tolerance of point being tracked
-    if (abs(a) <= MIN_ANG_TO_POINT) and (abs(p) <= MIN_DIST_TO_POINT):
-      PointTracker.traj_tracked = True
-  
+    # (abs(a) <= MIN_ANG_TO_POINT) and
+    if (abs(p) <= MIN_DIST_TO_POINT):
+      self.isDone = True
+
     if p > 0.1:
       # Use the control law to get forward velocity and angular velocity of vehicle
       if a >= -math.pi/2 and a <= math.pi/2: # how are we declaring a in the else statement if we are using a as the iF???
