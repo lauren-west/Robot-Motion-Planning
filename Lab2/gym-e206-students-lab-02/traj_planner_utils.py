@@ -45,7 +45,7 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
 
   q0 = (traj_point_0[1], traj_point_0[2], traj_point_0[3])
   q1 = (traj_point_1[1], traj_point_1[2], traj_point_1[3])
-  turning_radius = 1.0               
+  turning_radius = 0.75               
   step_size = DISTANCE_STEP_SIZE
 
   path = dubins.shortest_path(q0, q1, turning_radius)
@@ -60,11 +60,10 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
     traj.append(traj_point)
 
     nextPoint = configurations[i+1]
-    traj_distance += sqrt((nextPoint[0] * tup[0])**2 + (nextPoint[1] * tup[1])**2)
+    traj_distance += math.sqrt((nextPoint[0] - tup[0])**2 + (nextPoint[1] - tup[1])**2)
 
-  traj.append(listOfTimes[-1], configurations[-1][0], configurations[-1][1], configurations[-1][2])
-
-  return traj
+  traj.append((listOfTimes[-1], configurations[-1][0], configurations[-1][1], configurations[-1][2]))
+  return traj, traj_distance
 
 
 def plot_traj(traj_desired, traj_actual, objects, walls):

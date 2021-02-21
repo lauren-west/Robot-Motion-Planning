@@ -18,6 +18,9 @@ class Node():
     self.g_cost = g_cost
     self.h_cost = h_cost
     self.f_cost = self.g_cost + self.h_cost
+
+  def getState():
+    return self.state
     
   def manhattan_distance_to_node(self, node):
     return abs(self.state[1] - node.state[1]) + abs(self.state[2] - node.state[2])
@@ -36,7 +39,6 @@ class A_Star_Planner():
   EDGE_TIME = 10 #s
   LARGE_NUMBER = 9999999
 
-
   def __init__(self):
     self.fringe = []
 
@@ -52,48 +54,84 @@ class A_Star_Planner():
     self.desired_state = desired_state
     self.objects = objects
     self.walls = walls
-          
-    return []
+
+    initialNode = self.create_initial_node(initial_state)
+    self.add_to_fringe(initialNode)
+
+    # Just sorta psuedocode
+    while self.generate_goal_node(self.fringe[0], desired_state) == None:
+      newNode = self.get_best_node_on_fringe()
+      children_list = self.get_children(newNode)
+      for child in children_list:
+        self.add_to_fringe(child)
     
-  def add_to_fringe(self, node):
-    
-    # Add code here.
-    pass
+    goalNode = self.generate_goal_node(self.fringe[0], desired_state)
+
+    return build_traj(goalNode)
+
+  def add_to_fringe(self, node): 
+    # student written
+    if len(self.fringe) == 0:
+      self.fringe.append(node)
+    else:
+      for i in range(len(self.fringe)):
+        if self.fringe[i].f_cost > node.f_cost:
+          self.fringe = self.fringe[:i] + [node] + self.fringe[i:]
     
   def get_best_node_on_fringe(self):
     return self.fringe.pop(0)
     
   def get_children(self, node_to_expand):
     children_list = []
-    
-    # Add code here.
 
-        
+    # Psuedocode from E206 site
+    for i in range(len(self.CHILDREN_DELTAS)):
+      CHILDREN_DELTA = self.CHILDREN_DELTAS[i]
+      time = node_to_expand.state[0] + self.EDGE_TIME
+      x = node_to_expand.state[1] + self.DISTANCE_DELTA * math.cos(node_to_expand.state[3] + CHILDREN_DELTA)
+      y = node_to_expand.state[2] + self.DISTANCE_DELTA * math.sin(node_to_expand.state[3] + CHILDREN_DELTA)
+      theta = node_to_expand.state[3] + 2 * CHILDREN_DELTA
+      
+      # student written
+      state = (time, x, y, theta)
+      child = self.create_node(state, node_to_expand)
+      children_list.append(child)
+  
     return children_list
 
   def generate_goal_node(self, node, desired_state):
+    # student written
     
     # Add code here.
-      
-    return None
+    if (not self.collision_found(node.state, desired_state)):  
+      goal_node = self.create_node(desired_state, node)
+      return goal_node
+    else:
+      return None
+
     
   def create_node(self, state, parent_node):
     
-    # Add code here.
+    h_cost = self.estimate_cost_to_goal(self.desired_state)
+    g_cost = parent_node.g_cost + self.calculate_edge_distance(state, parent_node)
     
-    return None #Node(state, parent_node, g_cost, h_cost)
+    return Node(state, parent_node, g_cost, h_cost)
+
 
   def create_initial_node(self, state):
-    
-    # Add code here.
+    h_cost = self.estimate_cost_to_goal(self.desired_state)
+    g_cost = 0
+    return Node(state, None, g_cost, h_cost)
 
-    return #Node(state, None, g_cost, h_cost)
 
   def calculate_edge_distance(self, state, parent_node):
+    collision, traj_distance = self.collision_found(parent_node.state, state)
     
-    # Add code here.
-
-    return LARGE_NUMBER
+    # CAREFUL Collision found takes in two nodes, we pass in a state and a node
+    if collision:
+      return self.LARGE_NUMBER
+    else:
+      return traj_distance
 
   def estimate_cost_to_goal(self, state):
     return math.sqrt( (self.desired_state[1] - state[1])**2 + (self.desired_state[2] - state[2])**2 )
@@ -118,7 +156,8 @@ class A_Star_Planner():
     
     return traj
 
-  def collision_found(self, node_1, node_2):
+  # changed arguments from starter code collision_found(self, node_1, node_2) to what it is now
+  def collision_found(self, state_1, state_2):
     """ Return true if there is a collision with the traj between 2 nodes and the workspace
         Arguments:
           node_1 (Node): A node with the first state of the traj - Time, X, Y, Theta (s, m, m, rad).
@@ -128,8 +167,11 @@ class A_Star_Planner():
         Returns:
           collision_found (boolean): True if there is a collision.
     """
-    traj, traj_distance = construct_dubins_traj(node_1.state, node_2.state)
-    return collision_found(traj, self.objects, self.walls)
+    # added traj_distance as a return value 
+    traj, traj_distance = construct_dubins_traj(state_1, state_2)
+    return collision_found(traj, self.objects, self.walls), traj_distance
+
+
 
 if __name__ == '__main__':
   for i in range(0, 5):
