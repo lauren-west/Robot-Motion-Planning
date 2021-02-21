@@ -11,22 +11,61 @@ DISTANCE_STEP_SIZE = 0.1 #m
 COLLISION_INDEX_STEP_SIZE = 5
 ROBOT_RADIUS = 0.4 #m
 
+# LAB 2 STARTER CODE
+# def construct_dubins_traj(traj_point_0, traj_point_1):
+#   """ Construc a trajectory in the X-Y space and in the time-X,Y,Theta space.
+#       Arguments:
+#         traj_point_0 (list of floats): The trajectory's first trajectory point with time, X, Y, Theta (s, m, m, rad).
+#         traj_point_1 (list of floats): The trajectory's last trajectory point with time, X, Y, Theta (s, m, m, rad).
+#       Returns:
+#         traj (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
+#         traj_distance (float): The length ofthe trajectory (m).
+#   """
+#   traj = []
+#   traj_distance = 0
+
+#   # Add code here      
+#   return traj, traj_distance
+
 def construct_dubins_traj(traj_point_0, traj_point_1):
-  """ Construc a trajectory in the X-Y space and in the time-X,Y,Theta space.
+  """ Construct a trajectory in the X-Y space and in the time-X,Y,Theta space.
       Arguments:
         traj_point_0 (list of floats): The trajectory's first trajectory point with time, X, Y, Theta (s, m, m, rad).
         traj_point_1 (list of floats): The trajectory's last trajectory point with time, X, Y, Theta (s, m, m, rad).
       Returns:
-        traj (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
+        trajectory (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
         traj_distance (float): The length ofthe trajectory (m).
   """
+  
   traj = []
   traj_distance = 0
   
-  # Add code here
+  startTime = traj_point_0[0]
+  endTime = traj_point_1[0]
 
-      
-  return traj, traj_distance
+  q0 = (traj_point_0[1], traj_point_0[2], traj_point_0[3])
+  q1 = (traj_point_1[1], traj_point_1[2], traj_point_1[3])
+  turning_radius = 1.0               
+  step_size = DISTANCE_STEP_SIZE
+
+  path = dubins.shortest_path(q0, q1, turning_radius)
+  configurations, _ = path.sample_many(step_size) 
+
+  units = (endTime-startTime)/(len(configurations) - 1) 
+  listOfTimes = [(t * units) for t in range(len(configurations))]
+
+  for i in range(len(configurations) - 1):
+    tup = configurations[i]
+    traj_point = (listOfTimes[i], tup[0], tup[1], tup[2])
+    traj.append(traj_point)
+
+    nextPoint = configurations[i+1]
+    traj_distance += sqrt((nextPoint[0] * tup[0])**2 + (nextPoint[1] * tup[1])**2)
+
+  traj.append(listOfTimes[-1], configurations[-1][0], configurations[-1][1], configurations[-1][2])
+
+  return traj
+
 
 def plot_traj(traj_desired, traj_actual, objects, walls):
   """ Plot a trajectory in the X-Y space and in the time-X,Y,Theta space.

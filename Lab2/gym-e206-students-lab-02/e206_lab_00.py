@@ -27,7 +27,7 @@ def main():
   current_time_stamp = 0
   observation = [0,0,0,0,0]
   actual_traj = []
-  while not traj_tracker.is_traj_tracked():
+  while not controller.is_Done():
       current_state = [current_time_stamp, observation[0], observation[1], observation[2]]
       desired_state = traj_tracker.get_traj_point_to_track(current_state)
       print("Cur:",current_state,"Des:",desired_state)
