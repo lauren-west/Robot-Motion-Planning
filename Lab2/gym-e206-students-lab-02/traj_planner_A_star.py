@@ -58,7 +58,6 @@ class A_Star_Planner():
     initialNode = self.create_initial_node(initial_state)
     self.add_to_fringe(initialNode)
 
-    # Just sorta psuedocode
     while self.generate_goal_node(self.fringe[0], desired_state) == None:
       newNode = self.get_best_node_on_fringe()
       children_list = self.get_children(newNode)
@@ -103,7 +102,7 @@ class A_Star_Planner():
     # student written
     
     # Add code here.
-    if (not self.collision_found(node.state, desired_state)):  
+    if (not self.collision_found(node.state, desired_state)):
       goal_node = self.create_node(desired_state, node)
       return goal_node
     else:
