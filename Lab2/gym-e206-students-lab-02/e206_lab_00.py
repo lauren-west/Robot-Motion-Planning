@@ -5,12 +5,15 @@ import math
 import random
 from traj_planner_utils import *
 from traj_tracker import *
+from traj_planner_A_star import *
 
     
 def main():
   # Create a motion planning problem and solve it
   current_state, desired_state, objects, walls = create_motion_planning_problem()
-  desired_traj, _ = construct_dubins_traj(current_state, desired_state)
+  planner = A_Star_Planner()
+  desired_traj = planner.construct_traj(current_state, desired_state, objects, walls)
+  #construct_dubins_traj(current_state, desired_state)
   
   # Construct an environment
   env = gym.make("fetch-v0") # <-- this we need to create
