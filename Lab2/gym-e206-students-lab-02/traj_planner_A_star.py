@@ -50,13 +50,14 @@ class A_Star_Planner():
         Returns:
           traj (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
     """
-    self.fringe = []
+    
     self.desired_state = desired_state
     self.objects = objects
     self.walls = walls
+    self.fringe = []
 
-    initialNode = self.create_initial_node(initial_state)
-    self.add_to_fringe(initialNode)
+    initial_node = self.create_initial_node(initial_state)
+    self.fringe.append(initial_node)
 
     while self.generate_goal_node(self.fringe[0], desired_state) == None:
       newNode = self.get_best_node_on_fringe()
@@ -66,7 +67,7 @@ class A_Star_Planner():
     
     goalNode = self.generate_goal_node(self.fringe[0], desired_state)
 
-    return build_traj(goalNode)
+    return self.build_traj(goalNode)
 
   def add_to_fringe(self, node): 
     # student written
@@ -75,7 +76,10 @@ class A_Star_Planner():
     else:
       for i in range(len(self.fringe)):
         if self.fringe[i].f_cost > node.f_cost:
-          self.fringe = self.fringe[:i] + [node] + self.fringe[i:]
+          self.fringe.insert(i, node)
+          break 
+      self.fringe.insert(-1, node)
+      
     
   def get_best_node_on_fringe(self):
     return self.fringe.pop(0)
@@ -102,7 +106,8 @@ class A_Star_Planner():
     # student written
     
     # Add code here.
-    if (not self.collision_found(node.state, desired_state)):
+    collision, _ = self.collision_found(node.state, desired_state)
+    if (not collision):
       goal_node = self.create_node(desired_state, node)
       return goal_node
     else:
@@ -149,7 +154,9 @@ class A_Star_Planner():
       node_B = node_list[i]
       traj_point_0 = node_A.state
       traj_point_1 = node_B.state
+      traj_point_1 = list(traj_point_1)
       traj_point_1[3] = math.atan2(traj_point_1[2]-traj_point_0[2], traj_point_1[1]-traj_point_0[1])
+      traj_point_1 = tuple(traj_point_1)
       edge_traj, edge_traj_distance = construct_dubins_traj(traj_point_0, traj_point_1)
       traj = traj + edge_traj
     
