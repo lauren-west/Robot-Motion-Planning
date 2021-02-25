@@ -217,40 +217,39 @@ class A_Star_Planner():
 
 
 if __name__ == '__main__':
-  # for i in range(0, 5):
-  #   maxR = 10
-  #   tp0 = [0, -8, -8, 0]
-  #   tp1 = [20, 0, 0, 0]
-  #   # tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
-  #   planner = A_Star_Planner()
-  #   walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
-  #   # num_objects = 25
-  #   # objects = []
-  #   # for j in range(0, num_objects): 
-  #   #   obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-  #   #   while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
-  #   #     obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-  #   #   objects.append(obj)
-  #   objects = [[-9, -4, 1], [-7, -4, 1], [-5, -4, 1], [-3, -4, 1], [-1, -4, 1], [-4, -2, 1], [1, -4, 1], [3, 3, 0.5]]
-  #   traj = planner.construct_traj(tp0, tp1, objects, walls)
-  #   if len(traj) > 0:
-  #     plot_traj(traj, traj, objects, walls)
-
+  for i in range(0, 5):
     maxR = 10
     tp0 = [0, -8, -8, 0]
-    tp1 = [20, 0, 0, 0]
-    # tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
+    tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
     planner = A_Star_Planner()
     walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
-    # num_objects = 25
-    # objects = []
-    # for j in range(0, num_objects): 
-    #   obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-    #   while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
-    #     obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-    #   objects.append(obj)
-    objects = [[-8, -4, 1.5], [-3, -4, 1.5], [-1, -4, 1], [-5, -8, 1], [-2, -6, 1], [1, -4, 1]]
+    num_objects = 25
+    objects = []
+    for j in range(0, num_objects): 
+      obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+      while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
+        obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+      objects.append(obj)
+    # objects = [[-9, -4, 1], [-7, -4, 1], [-5, -4, 1], [-3, -4, 1], [-1, -4, 1], [-4, -2, 1], [1, -4, 1], [3, 3, 0.5]]
     traj = planner.construct_traj(tp0, tp1, objects, walls)
-    print(total_traj_distance)
     if len(traj) > 0:
-      plot_traj(traj, traj, objects, walls)  
+      plot_traj(traj, traj, objects, walls)
+
+    # maxR = 10
+    # tp0 = [0, -8, -8, 0]
+    # tp1 = [20, 0, 0, 0]
+    # # tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
+    # planner = A_Star_Planner()
+    # walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
+    # # num_objects = 25
+    # # objects = []
+    # # for j in range(0, num_objects): 
+    # #   obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+    # #   while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
+    # #     obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+    # #   objects.append(obj)
+    # objects = [[-8, -4, 1.5], [-3, -4, 1.5], [-1, -4, 1], [-5, -8, 1], [-2, -6, 1], [1, -4, 1]]
+    # traj = planner.construct_traj(tp0, tp1, objects, walls)
+    # print(total_traj_distance)
+    # if len(traj) > 0:
+    #   plot_traj(traj, traj, objects, walls)  
