@@ -59,13 +59,16 @@ class A_Star_Planner():
     initial_node = self.create_initial_node(initial_state)
     self.fringe.append(initial_node)
 
+
+
     while self.generate_goal_node(self.fringe[0], desired_state) == None:
       newNode = self.get_best_node_on_fringe()
       children_list = self.get_children(newNode)
       for child in children_list:
         self.add_to_fringe(child)
     
-    goalNode = self.generate_goal_node(self.fringe[0], desired_state)
+    new_desired = (self.fringe[0].state[0] + self.EDGE_TIME, desired_state[1], desired_state[2], desired_state[3])
+    goalNode = self.generate_goal_node(self.fringe[0], new_desired)
 
     return self.build_traj(goalNode)
 

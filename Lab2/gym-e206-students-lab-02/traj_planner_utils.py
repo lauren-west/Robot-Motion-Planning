@@ -52,7 +52,7 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
   configurations, _ = path.sample_many(step_size) 
 
   units = (endTime-startTime)/(len(configurations) - 1) 
-  listOfTimes = [(t * units) for t in range(len(configurations))]
+  listOfTimes = [(t * units) + startTime for t in range(len(configurations))]
 
   for i in range(len(configurations) - 1):
     tup = configurations[i]

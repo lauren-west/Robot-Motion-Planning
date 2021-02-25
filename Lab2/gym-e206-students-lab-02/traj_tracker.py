@@ -107,7 +107,7 @@ class PointTracker():
     k_rots= 2
     
     # Constants to get velocities and torques
-    #ROBOT_BODY_LENGTH = 1  # 
+    # ROBOT_BODY_LENGTH = 1  
     L = 0.35
 
     # Extract theta, x, y
