@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from traj_planner_utils import *
 import numpy as np
 
+total_traj_distance = 0
+
 class Node():
 
   def __init__(self, state, parent_node, g_cost, h_cost):
@@ -35,6 +37,12 @@ class A_Star_Planner():
   
   DIST_TO_GOAL_THRESHOLD = 0.5 #m
   CHILDREN_DELTAS = [-0.5, -0.25, 0.0, 0.25, 0.5]
+  #CHILDREN_DELTAS = [-0.3, -0.15, 0.0, 0.15, 0.3]
+  #CHILDREN_DELTAS = [-0.6, -0.3, 0.0, 0.3, 0.6]
+  #CHILDREN_DELTAS = [-0.53, -0.265, 0.0, 0.265, 0.53]
+  #CHILDREN_DELTAS = [-0.47, -0.235, 0.0, 0.235, 0.47]
+  #CHILDREN_DELTAS = [-0.4, -0.2, 0.0, 0.2, 0.4]
+  #CHILDREN_DELTAS = [-0.7, -0.35, 0.0, 0.35, 0.7]
   DISTANCE_DELTA = 1.5 #m
   EDGE_TIME = 10 #s
   LARGE_NUMBER = 9999999
@@ -145,6 +153,9 @@ class A_Star_Planner():
 
   def build_traj(self, goal_node):
     
+    global total_traj_distance
+    total_traj_distance = 0
+
     node_list = []
     node_to_add = goal_node
     while node_to_add != None:
@@ -161,8 +172,31 @@ class A_Star_Planner():
       traj_point_1[3] = math.atan2(traj_point_1[2]-traj_point_0[2], traj_point_1[1]-traj_point_0[1])
       traj_point_1 = tuple(traj_point_1)
       edge_traj, edge_traj_distance = construct_dubins_traj(traj_point_0, traj_point_1)
+      
+      total_traj_distance += edge_traj_distance
       traj = traj + edge_traj
-    
+
+      ########## CHILDREN_DELTA = [-0.5, -0.25, 0.0, 0.25, 0.5] ################
+      # traj length: 11.998502403593706
+
+      ########## CHILDREN_DELTA = [-0.3, -0.15, 0.0, 0.15, 0.3] ################
+      # traj length: 12.898756032515823
+      
+      ########## CHILDREN_DELTA = [-0.6, -0.3, 0.0, 0.3, 0.6]
+      # traj length: 12.098711900557902
+
+      ########## CHILDREN_DELTA = [-0.53, -0.265, 0.0, 0.265, 0.53]
+      # traj length: 12.398229837927044
+
+       ########## CHILDREN_DELTA = [-0.47, -0.235, 0.0, 0.235, 0.47]
+       # traj length: 12.199023142374802
+
+      ########## CHILDREN_DELTA = [-0.4, -0.2, 0.0, 0.2, 0.4]
+      # traj length:11.998929287263906
+
+      ########## CHILDREN_DELTA = [-0.7, -0.35, 0.0, 0.35, 0.7]
+      # traj length: 12.097732792113147
+
     return traj
 
   # changed arguments from starter code collision_found(self, node_1, node_2) to what it is now
@@ -183,19 +217,40 @@ class A_Star_Planner():
 
 
 if __name__ == '__main__':
-  for i in range(0, 5):
+  # for i in range(0, 5):
+  #   maxR = 10
+  #   tp0 = [0, -8, -8, 0]
+  #   tp1 = [20, 0, 0, 0]
+  #   # tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
+  #   planner = A_Star_Planner()
+  #   walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
+  #   # num_objects = 25
+  #   # objects = []
+  #   # for j in range(0, num_objects): 
+  #   #   obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+  #   #   while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
+  #   #     obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+  #   #   objects.append(obj)
+  #   objects = [[-9, -4, 1], [-7, -4, 1], [-5, -4, 1], [-3, -4, 1], [-1, -4, 1], [-4, -2, 1], [1, -4, 1], [3, 3, 0.5]]
+  #   traj = planner.construct_traj(tp0, tp1, objects, walls)
+  #   if len(traj) > 0:
+  #     plot_traj(traj, traj, objects, walls)
+
     maxR = 10
     tp0 = [0, -8, -8, 0]
-    tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
+    tp1 = [20, 0, 0, 0]
+    # tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
     planner = A_Star_Planner()
     walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
-    num_objects = 25
-    objects = []
-    for j in range(0, num_objects): 
-      obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-      while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
-        obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-      objects.append(obj)
+    # num_objects = 25
+    # objects = []
+    # for j in range(0, num_objects): 
+    #   obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+    #   while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
+    #     obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+    #   objects.append(obj)
+    objects = [[-8, -4, 1.5], [-3, -4, 1.5], [-1, -4, 1], [-5, -8, 1], [-2, -6, 1], [1, -4, 1]]
     traj = planner.construct_traj(tp0, tp1, objects, walls)
+    print(total_traj_distance)
     if len(traj) > 0:
-      plot_traj(traj, traj, objects, walls)
+      plot_traj(traj, traj, objects, walls)  
