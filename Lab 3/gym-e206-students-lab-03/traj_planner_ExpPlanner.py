@@ -58,7 +58,18 @@ class Expansive_Planner():
     self.objects = objects
     self.walls = walls
     
-    # Add code here to make a traj #
+    start_node = Node(initial_state, None, 0)
+    self.add_to_tree(start_node)
+    
+    while True:
+      rand_node = self.sample_random_node()
+      expansion_node = self.generate_random_node(rand_node)
+      if not self.collision_found(rand_node, expansion_node):
+        self.add_to_tree(expansion_node)
+        goal_node = self.generate_goal_node(expansion_node, desired_state)
+        if not goal_node == None:
+          self.add_to_tree(goal_node)
+          return self.build_traj(goal_node)
       
     return [], self.LARGE_NUMBER
     
@@ -85,8 +96,7 @@ class Expansive_Planner():
         Arguments:
           node (Node): The node to be added.
     """
-    
-    # Add code here to add a node to the tree#
+    self.tree.append(node)
     pass
     
   def sample_random_node(self):
@@ -94,10 +104,8 @@ class Expansive_Planner():
         Returns:
           node (Node): A randomly selected node from the tree.
     """
-    
     # Add code here to return a random node from the tree #
-    
-    return None
+    return random.choice(self.tree)
     
   def generate_random_node(self, node_to_expand):
     """ Create a new node by expanding from the parent node using.
@@ -106,10 +114,17 @@ class Expansive_Planner():
         Returns:
           new_node (Node): The newly generated node.
     """
-    
     # Add code here to make a new node #
-    
-    return None
+    random_distance = random.randint(self.MIN_RAND_DISTANCE, self.MAX_RAND_DISTANCE)
+    random_angle = random.uniform(-math.pi, math.pi)
+
+    time = node_to_expand.time + random_distance/self.MEAN_EDGE_VELOCITY
+    x = node_to_expand.x + random_distance * math.cos(node_to_expand.theta + random_angle)
+    y = node_to_expand.y + random_distance * math.sin(node_to_expand.theta + random_angle)
+    theta = node_to_expand.theta + 2*random_angle
+    state = (x, y, theta, time)
+
+    return Node(state, node_to_expand, self.calculate_edge_distance(state, node_to_expand))
 
   def generate_goal_node(self, node, desired_state):
     """ Create a goal node by connecting from the parent node using.
@@ -120,9 +135,12 @@ class Expansive_Planner():
     """
     
     # Add code here to make a goal node if possible #
-   
-      
-    return None
+    collision, _ = self.collision_found(node.state, desired_state)
+    if (not collision):
+      goal_node = Node(desired_state, node, self.calculate_edge_distance(desired_state, node))
+      return goal_node
+    else:
+      return None
 
   def calculate_edge_distance(self, state, parent_node):
     """ Calculate the cost of an dubins path edge from a parent node's state to another state.

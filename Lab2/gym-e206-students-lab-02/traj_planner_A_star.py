@@ -21,7 +21,7 @@ class Node():
     self.h_cost = h_cost
     self.f_cost = self.g_cost + self.h_cost
 
-  def getState():
+  def getState(self):
     return self.state
     
   def manhattan_distance_to_node(self, node):
@@ -215,7 +215,6 @@ class A_Star_Planner():
     return collision_found(traj, self.objects, self.walls), traj_distance
 
 
-
 if __name__ == '__main__':
   for i in range(0, 5):
     maxR = 10
@@ -223,8 +222,8 @@ if __name__ == '__main__':
     tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
     planner = A_Star_Planner()
     walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
-    num_objects = 25
     objects = []
+    num_objects = 25
     for j in range(0, num_objects): 
       obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
       while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
