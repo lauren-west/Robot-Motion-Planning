@@ -52,5 +52,3 @@ def create_motion_planning_problem():
 
 if __name__ == '__main__':
     main()
-    
-    
