@@ -88,7 +88,7 @@ class Expansive_Planner():
     current_time = start_time
     best_traj = []
     best_traj_cost = self.LARGE_NUMBER
-    TIME_BUDGET = 5 #In seconds
+    TIME_BUDGET = 1 #In seconds
     print("The time budget is: " + str(TIME_BUDGET))
     while (current_time - start_time) < TIME_BUDGET:
       traj, traj_cost = self.construct_traj(initial_state, desired_state, objects, walls)

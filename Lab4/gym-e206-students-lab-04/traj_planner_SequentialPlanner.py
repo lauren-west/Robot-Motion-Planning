@@ -36,7 +36,7 @@ class Planning_Problem():
           - traj_set (list of list of floats): The trajectories to be treated as obstacles.
     """
     for traj in traj_set:
-      self.objects.append(['traj',traj])
+      self.objects.append(['traj', traj])
 
 class Sequential_Planner():
   
@@ -50,10 +50,12 @@ class Sequential_Planner():
         - Returns:
           - traj_set (list of list of floats): One traj per robot.
     """
-    
+    traj_set = []
     # Add code here to create a traj set #
-        
-    return []
+    for pp in planning_problem_list:
+      pp.add_trajs_as_obstacles(traj_set)
+      traj_set.append(pp.planner.construct_optimized_traj(pp.initial_state, pp.desired_state, pp.objects, pp.walls))
+    return traj_set
       
 def random_pose(maxR):
   """ Function to generate random pose (x, y, theta) within bounds +/- maxR.
