@@ -5,12 +5,16 @@ import math
 import random
 from traj_planner_utils import *
 from traj_tracker import *
+from traj_planner_A_star import *
+from traj_planner_ExpPlanner import *
 
     
 def main():
   # Create a motion planning problem and solve it
   current_state, desired_state, objects, walls = create_motion_planning_problem()
-  desired_traj = construct_dubins_traj(current_state, desired_state)
+  planner = Expansive_Planner()
+  desired_traj, _ = planner.construct_optimized_traj(current_state, desired_state, objects, walls)
+  #construct_dubins_traj(current_state, desired_state)
   
   # Construct an environment
   env = gym.make("fetch-v0") # <-- this we need to create
@@ -27,10 +31,10 @@ def main():
   current_time_stamp = 0
   observation = [0,0,0,0,0]
   actual_traj = []
-  while not traj_tracker.is_traj_tracked():
+  while not controller.is_Done():
       current_state = [current_time_stamp, observation[0], observation[1], observation[2]]
       desired_state = traj_tracker.get_traj_point_to_track(current_state)
-      print("Cur:",current_state,"Des:",desired_state)
+      # print("Cur:",current_state,"Des:",desired_state)
       action = controller.point_tracking_control(desired_state, current_state)
       observation, reward, done, dummy = env.step(action)
       env.render('human')
@@ -38,16 +42,24 @@ def main():
       current_time_stamp += TIME_STEP_SIZE
   time.sleep(2)
   plot_traj(desired_traj, actual_traj, objects, walls)
-  
   env.close()
   
 def create_motion_planning_problem():
-  current_state = [0, 0, 0, 0]
-  desired_state = [20, 5.0, 2.0, 0]
   maxR = 8
+  current_state = [0, 0, 0, 0]
+  desired_state = [15, 5.0, 2.0, 0]
+  # tp0 = [0, -8, -8, 0]
+  # tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
   walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
-  objects = [[4, 0, 1.0], [-2, -3, 1.5]]
-  
+  objects = [[2.5, 1, 1.0], [-2, -3, 1.5], [-4, -4, 1.5]]
+
+  # num_objects = 25
+  # objects = []
+  # for j in range(0, num_objects): 
+  #   obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+  #   while (abs(obj[0]-current_state[1]) < 1 and abs(obj[1]-current_state[2]) < 1) or (abs(obj[0]-desired_state[1]) < 1 and abs(obj[1]-desired_state[2]) < 1):
+  #     obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+  #   objects.append(obj)
   return current_state, desired_state, objects, walls
 
 if __name__ == '__main__':

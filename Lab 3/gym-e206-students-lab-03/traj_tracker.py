@@ -21,6 +21,7 @@ class TrajectoryTracker():
     self.current_point_to_track = 0
     self.traj = traj
     self.traj_tracked = False
+
   # LAB 2 STARTER CODE 
   # def get_traj_point_to_track(self, current_state):
   #   """ Determine which point of the traj should be tracked at the current time.
@@ -51,7 +52,6 @@ class TrajectoryTracker():
       prior_point = point
     
     return self.current_point_to_track
-  
   
   def print_traj(self):
     """ Print the trajectory points.
