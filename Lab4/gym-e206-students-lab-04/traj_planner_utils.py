@@ -40,7 +40,7 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
     traj_point = [traj_point_time, c[0], c[1], c[2]]
     traj.append(traj_point)
     traj_point_time += time_step_size
-      
+     
   return traj, traj_distance
 
 def plot_traj(traj_desired, traj_actual, objects, walls):

@@ -167,6 +167,7 @@ class Expansive_Planner():
         Returns:
           goal_node: The newly generated goal node or None if there is not goal connection.
     """
+    print(desired_state)
     goal_node = Node(desired_state, node, self.calculate_edge_distance(desired_state, node))
     collision = self.collision_found(node, goal_node)
     if (not collision):
@@ -253,7 +254,7 @@ if __name__ == '__main__':
     traj, traj_cost = planner.construct_optimized_traj(tp0, tp1, objects, walls)
     # traj, traj_cost = planner.construct_traj(tp0, tp1, objects, walls)
     if len(traj) > 0:
-      #plot_traj(traj, traj, objects, walls)
+      # plot_traj(traj, traj, objects, walls)
       if traj_cost < minimum:
         minimum = traj_cost
       if traj_cost > maximum:
@@ -265,3 +266,4 @@ if __name__ == '__main__':
   print("The min traj_cost is: " + str(minimum))
   print("The max traj_cost is: " + str(maximum))
   print("The average traj_cost is: " + str(mean))
+  plot_traj(traj, traj, objects, walls)
