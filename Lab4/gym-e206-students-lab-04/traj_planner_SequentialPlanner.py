@@ -54,8 +54,12 @@ class Sequential_Planner():
     # Add code here to create a traj set #
     for pp in planning_problem_list:
       pp.add_trajs_as_obstacles(traj_set)
-      traj_set.append(pp.planner.construct_optimized_traj(pp.initial_state, pp.desired_state, pp.objects, pp.walls))
+      best_traj, _ = pp.planner.construct_traj(pp.initial_state, pp.desired_state, pp.objects, pp.walls)
+      traj_set.append(best_traj)
     return traj_set
+
+
+    
       
 def random_pose(maxR):
   """ Function to generate random pose (x, y, theta) within bounds +/- maxR.
@@ -87,40 +91,62 @@ def get_new_random_pose(pose_list, maxR, radius):
   return new_pose + [radius]
 
 if __name__ == '__main__':
-  num_robots = 1
-  num_objects = 2
-  maxR = 10
-  obj_vel = 0.0
-  
-  robot_initial_pose_list = []
-  robot_initial_state_list = []
-  for _ in range(num_robots):
-    ns = get_new_random_pose(robot_initial_pose_list, maxR, ROBOT_RADIUS)
-    robot_initial_pose_list += [ns]
-    robot_initial_state_list += [[0, ns[0], ns[1], ns[2]]]
-  
-  robot_desired_pose_list = []
-  robot_desired_state_list = []
-  for _ in range(num_robots):
-    ns = get_new_random_pose(robot_desired_pose_list, maxR, ROBOT_RADIUS)
-    robot_desired_pose_list += [ns]
-    robot_desired_state_list += [[0, ns[0], ns[1], ns[2]]]
+  # totalTime = 0
+  # numTimes = 2
+  # for i in range(numTimes):
+    # start_time = time.perf_counter()
+    num_robots = 3
+    num_objects = 2
+    maxR = 10
+    obj_vel = 2.0   # object velocity
+    
+    robot_initial_pose_list = []
+    robot_initial_state_list = []
+    for _ in range(num_robots):
+      ns = get_new_random_pose(robot_initial_pose_list, maxR, ROBOT_RADIUS)
+      robot_initial_pose_list += [ns]
+      robot_initial_state_list += [[0, ns[0], ns[1], ns[2]]]
+    
+    robot_desired_pose_list = []
+    robot_desired_state_list = []
+    for _ in range(num_robots):
+      ns = get_new_random_pose(robot_desired_pose_list, maxR, ROBOT_RADIUS)
+      robot_desired_pose_list += [ns]
+      robot_desired_state_list += [[15, ns[0], ns[1], ns[2]]] # fixed going back in time error 
 
-  object_list = []
-  for _ in range(num_objects):
-    object_radius = random.uniform(0.3, 1.0)
-    obj_pose = get_new_random_pose(robot_initial_pose_list + robot_desired_pose_list, maxR, object_radius)
-    obj_yaw = obj_pose[2]
-    object_list += [ ['obstacle',[obj_pose[0], obj_pose[1], 0.5, obj_vel, obj_yaw]] ]
+    object_list = []
+    for _ in range(num_objects):
+      object_radius = random.uniform(0.3, 1.0)
+      obj_pose = get_new_random_pose(robot_initial_pose_list + robot_desired_pose_list, maxR, object_radius)
+      obj_yaw = obj_pose[2]
+      object_list += [ ['obstacle',[obj_pose[0], obj_pose[1], 0.5, obj_vel, obj_yaw]] ]
+      
+    walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
+      
+    planning_problem_list = []
+    for i in range(num_robots):
+      pp = Planning_Problem(robot_initial_state_list[i], robot_desired_state_list[i], object_list, walls)
+      planning_problem_list.append(pp)
     
-  walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
-    
-  planning_problem_list = []
-  for i in range(num_robots):
-    pp = Planning_Problem(robot_initial_state_list[i], robot_desired_state_list[i], object_list, walls)
-    planning_problem_list.append(pp)
-  
-  planner = Sequential_Planner()
-  traj_list = planner.construct_traj_set(planning_problem_list)
-  if len(traj_list) > 0:
-    plot_traj_list(traj_list, object_list, walls)
+    planner = Sequential_Planner()
+    traj_list = planner.construct_traj_set(planning_problem_list)
+    if len(traj_list) > 0:
+      # current_time = time.perf_counter()
+      # totalTime += current_time - start_time
+  # print(totalTime/numTimes)
+      plot_traj_list(traj_list, object_list, walls)
+
+
+#  start_time = time.perf_counter()
+#     current_time = start_time
+#     best_traj = []
+#     best_traj_cost = self.LARGE_NUMBER
+#     TIME_BUDGET = 1 #In seconds
+#     print("The time budget is: " + str(TIME_BUDGET))
+#     while (current_time - start_time) < TIME_BUDGET:
+#       traj, traj_cost = self.construct_traj(initial_state, desired_state, objects, walls)
+#       if traj_cost < best_traj_cost:
+#         best_traj_cost = traj_cost
+#         best_traj = traj
+#       current_time = time.perf_counter()
+#     return best_traj, best_traj_cost
