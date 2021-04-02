@@ -38,6 +38,7 @@ class Expansive_Planner():
   MAX_NUM_ITERATIONS = 1000
   MIN_RAND_DISTANCE = 1.0 #m
   MAX_RAND_DISTANCE = 5.0 #m
+  # MEAN_EDGE_VELOCITY = random.uniform(0.1, 4)
   MEAN_EDGE_VELOCITY = 0.75 #m
   PLAN_TIME_BUDGET = 0.5 #s
     
@@ -63,7 +64,7 @@ class Expansive_Planner():
     self.add_to_tree(start_node)
     start_time = time.perf_counter()
 
-    while time.perf_counter() - start_time < 100:
+    while time.perf_counter() - start_time < 0.1:
       rand_node = self.sample_random_node()
       expansion_node = self.generate_random_node(rand_node)
       if not self.collision_found(rand_node, expansion_node):
@@ -72,7 +73,8 @@ class Expansive_Planner():
         if not goal_node == None:
           self.add_to_tree(goal_node)
           return self.build_traj(goal_node)
-      
+    
+    print(f"I timed out.")
     return [], self.LARGE_NUMBER
         
   def construct_optimized_traj(self, initial_state, desired_state, objects, walls):
@@ -167,7 +169,6 @@ class Expansive_Planner():
         Returns:
           goal_node: The newly generated goal node or None if there is not goal connection.
     """
-    print(desired_state)
     goal_node = Node(desired_state, node, self.calculate_edge_distance(desired_state, node))
     collision = self.collision_found(node, goal_node)
     if (not collision):

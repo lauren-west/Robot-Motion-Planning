@@ -52,15 +52,24 @@ class Sequential_Planner():
     """
     traj_set = []
     # Add code here to create a traj set #
-    for pp in planning_problem_list:
+    random_list = planning_problem_list
+
+    while (len(random_list) != 0):
+      pp = random.choice(random_list)
+      random_list.remove(pp)
       pp.add_trajs_as_obstacles(traj_set)
       best_traj, _ = pp.planner.construct_traj(pp.initial_state, pp.desired_state, pp.objects, pp.walls)
       traj_set.append(best_traj)
+
     return traj_set
 
+      # Sequential:
+      # for pp in planning_problem_list:
+      #   pp.add_trajs_as_obstacles(traj_set)
+      #   best_traj, _ = pp.planner.construct_traj(pp.initial_state, pp.desired_state, pp.objects, pp.walls)
+      #   traj_set.append(best_traj)
+      # return traj_set
 
-    
-      
 def random_pose(maxR):
   """ Function to generate random pose (x, y, theta) within bounds +/- maxR.
       Parameters:
@@ -91,15 +100,20 @@ def get_new_random_pose(pose_list, maxR, radius):
   return new_pose + [radius]
 
 if __name__ == '__main__':
-  # totalTime = 0
-  # numTimes = 2
-  # for i in range(numTimes):
-    # start_time = time.perf_counter()
-    num_robots = 3
-    num_objects = 2
-    maxR = 10
-    obj_vel = 2.0   # object velocity
-    
+  totalTime = 0
+  TIME_BUDGET = 10
+  num_robots = 5
+  num_objects = 2
+  maxR = 10
+  obj_vel = 2.0   # object velocity
+  numTimes = 0
+
+  start_time = time.perf_counter()
+  current_time = time.perf_counter()
+
+  while (current_time - start_time) < TIME_BUDGET:
+    print(f'Your time budget is: {TIME_BUDGET}')
+    initial_time = time.perf_counter()
     robot_initial_pose_list = []
     robot_initial_state_list = []
     for _ in range(num_robots):
@@ -130,11 +144,16 @@ if __name__ == '__main__':
     
     planner = Sequential_Planner()
     traj_list = planner.construct_traj_set(planning_problem_list)
-    if len(traj_list) > 0:
-      # current_time = time.perf_counter()
-      # totalTime += current_time - start_time
-  # print(totalTime/numTimes)
-      plot_traj_list(traj_list, object_list, walls)
+
+    if len(traj_list) > 0 and [] not in traj_list:
+      current_time = time.perf_counter()
+      totalTime += current_time - initial_time
+      numTimes += 1
+
+    current_time = time.perf_counter()
+
+  print(totalTime/numTimes)
+      #plot_traj_list(traj_list, object_list, walls)
 
 
 #  start_time = time.perf_counter()

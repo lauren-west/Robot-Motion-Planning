@@ -203,22 +203,23 @@ def collision_found(traj, objects, walls):
   return False
   
 def collision_with_traj(traj, traj_point):
+  distance = -1
+  if not traj == []:
+    traj_point_time = traj_point[0]
+    begin_time = traj[0][0]
+    end_time = traj[-1][0]
+    if traj_point_time < begin_time - BUFFER_TIME or traj_point_time > end_time + BUFFER_TIME:
+      return False
+    elif traj_point_time < begin_time:
+      traj_point_at_time = traj[0]
+    elif traj_point_time > end_time:
+      traj_point_at_time = traj[-1]
+    else:
+      time_fraction = traj_point_time / (end_time - begin_time)
+      index = int(time_fraction*len(traj))
+      traj_point_at_time = traj[index]
   
-  traj_point_time = traj_point[0]
-  begin_time = traj[0][0]
-  end_time = traj[-1][0]
-  if traj_point_time < begin_time - BUFFER_TIME or traj_point_time > end_time + BUFFER_TIME:
-    return False
-  elif traj_point_time < begin_time:
-    traj_point_at_time = traj[0]
-  elif traj_point_time > end_time:
-    traj_point_at_time = traj[-1]
-  else:
-    time_fraction = traj_point_time / (end_time - begin_time)
-    index = int(time_fraction*len(traj))
-    traj_point_at_time = traj[index]
-  
-  distance = generate_distance_to_traj_point(traj_point, traj_point_at_time) - 2*ROBOT_RADIUS - COLLISION_BUFFER
+    distance = generate_distance_to_traj_point(traj_point, traj_point_at_time) - 2*ROBOT_RADIUS - COLLISION_BUFFER
   if distance < 0:
     return True
   
