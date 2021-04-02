@@ -51,24 +51,40 @@ class Sequential_Planner():
           - traj_set (list of list of floats): One traj per robot.
     """
     traj_set = []
-    # Add code here to create a traj set #
-    random_list = planning_problem_list
+    # Priority (Chooses robots with the highest euclidian distance to their goal first)
+    copy_of_list = planning_problem_list
+    while len(copy_of_list) != 0:
+      highest_distance = -1
+      priority_pp = None
+      for pp in planning_problem_list:
+        distance = math.sqrt( (pp.initial_state[1] - pp.desired_state[1])**2 + (pp.initial_state[2] - pp.desired_state[2])**2 )
+        if distance > highest_distance:
+          priority_pp = pp
+          highest_distance = distance
 
-    while (len(random_list) != 0):
-      pp = random.choice(random_list)
-      random_list.remove(pp)
-      pp.add_trajs_as_obstacles(traj_set)
-      best_traj, _ = pp.planner.construct_traj(pp.initial_state, pp.desired_state, pp.objects, pp.walls)
+      copy_of_list.remove(priority_pp)  
+      priority_pp.add_trajs_as_obstacles(traj_set)
+      best_traj, _ = priority_pp.planner.construct_traj(priority_pp.initial_state, priority_pp.desired_state, priority_pp.objects, priority_pp.walls)
       traj_set.append(best_traj)
 
     return traj_set
+    
+    # Random: 
+    # random_list = planning_problem_list
+    # while (len(random_list) != 0):
+    #   pp = random.choice(random_list)
+    #   random_list.remove(pp)
+    #   pp.add_trajs_as_obstacles(traj_set)
+    #   best_traj, _ = pp.planner.construct_traj(pp.initial_state, pp.desired_state, pp.objects, pp.walls)
+    #   traj_set.append(best_traj)
+    # return traj_set
 
-      # Sequential:
-      # for pp in planning_problem_list:
-      #   pp.add_trajs_as_obstacles(traj_set)
-      #   best_traj, _ = pp.planner.construct_traj(pp.initial_state, pp.desired_state, pp.objects, pp.walls)
-      #   traj_set.append(best_traj)
-      # return traj_set
+    # Sequential:
+    # for pp in planning_problem_list:
+    #   pp.add_trajs_as_obstacles(traj_set)
+    #   best_traj, _ = pp.planner.construct_traj(pp.initial_state, pp.desired_state, pp.objects, pp.walls)
+    #   traj_set.append(best_traj)
+    # return traj_set
 
 def random_pose(maxR):
   """ Function to generate random pose (x, y, theta) within bounds +/- maxR.
