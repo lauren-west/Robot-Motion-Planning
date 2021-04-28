@@ -42,9 +42,12 @@ class Shark():
   DESIRED_STATE_THETA = 1.39626   # rad
   DESIRED_STATE_RADIUS = 2.5      # m  (will scale up if need be)
 
+  MIN_DESIRED_RADIUS = DESIRED_STATE_RADIUS - 1    # m
+  MAX_DESIRED_RADIUS = DESIRED_STATE_RADIUS + 1    # m
+
   def __init__(self, state, boundaries):
     self.state = state            # Contains [x, y, theta]
-    self.previous_state = None
+    self.previous_states = []
     self.boundaries = boundaries
 
   def getState(self):
@@ -53,9 +56,9 @@ class Shark():
   def euclidean_distance_to_state(self, state):
     return math.sqrt( (self.state[1] - state[1])**2 + (self.state[2] - state[2])**2 )
 
-  def updateStates(self):
+  def updateState(self):
     x, y, theta = self.state
-    self.previous_state = self.state
+    self.previous_state.append(self.state)
 
     not_valid = True
 
@@ -66,11 +69,10 @@ class Shark():
       x = x + random_distance * math.cos(theta + random_angle)
       y = y + random_distance * math.sin(theta + random_angle)
 
-      #  walls (list of lists): A list of walls defined by end points - X0, Y0, X1, Y1, length (m, m, m, m, m).
       x_min = self.boundaries[0][0]
       x_max = self.boundaries[0][2]
-      y_min = self.boundaires[1][3]
-      y_max = self.boundaires[1][1]
+      y_min = self.boundaries[1][3]
+      y_max = self.boundaries[1][1]
 
       if x_min <= x <= x_max and y_min <= y <= y_max:
         not_valid = False  
@@ -82,8 +84,8 @@ class Shark():
 
     x_min = self.boundaries[0][0]
     x_max = self.boundaries[0][2]
-    y_min = self.boundaires[1][3]
-    y_max = self.boundaires[1][1]
+    y_min = self.boundaries[1][3]
+    y_max = self.boundaries[1][1]
 
     x, y, theta = self.state
 
@@ -115,12 +117,6 @@ class A_Star_Planner():
   
   DIST_TO_GOAL_THRESHOLD = 0.5 #m
   CHILDREN_DELTAS = [-0.5, -0.25, 0.0, 0.25, 0.5]
-  #CHILDREN_DELTAS = [-0.3, -0.15, 0.0, 0.15, 0.3]
-  #CHILDREN_DELTAS = [-0.6, -0.3, 0.0, 0.3, 0.6]
-  #CHILDREN_DELTAS = [-0.53, -0.265, 0.0, 0.265, 0.53]
-  #CHILDREN_DELTAS = [-0.47, -0.235, 0.0, 0.235, 0.47]
-  #CHILDREN_DELTAS = [-0.4, -0.2, 0.0, 0.2, 0.4]
-  #CHILDREN_DELTAS = [-0.7, -0.35, 0.0, 0.35, 0.7]
   DISTANCE_DELTA = 1.5 #m
   EDGE_TIME = 10 #s
   LARGE_NUMBER = 9999999
@@ -128,7 +124,7 @@ class A_Star_Planner():
   def __init__(self):
     self.fringe = []
 
-  def construct_traj(self, initial_state, desired_state, objects, walls):
+  def construct_traj(self, initial_state, desired_state, objects, walls, shark):
     """ Construct a trajectory in the X-Y space and in the time-X,Y,Theta space.
         Arguments:
           traj_point_0 (list of floats): The trajectory's first trajectory point with time, X, Y, Theta (s, m, m, rad).
@@ -141,12 +137,11 @@ class A_Star_Planner():
     self.objects = objects
     self.walls = walls
     self.fringe = []
-    self.shark = 
+    self.shark = shark
+    
 
     initial_node = self.create_initial_node(initial_state)
     self.fringe.append(initial_node)
-
-
 
     while self.generate_goal_node(self.fringe[0], desired_state) == None:
       newNode = self.get_best_node_on_fringe()
@@ -254,27 +249,6 @@ class A_Star_Planner():
       total_traj_distance += edge_traj_distance
       traj = traj + edge_traj
 
-      ########## CHILDREN_DELTA = [-0.5, -0.25, 0.0, 0.25, 0.5] ################
-      # traj length: 11.998502403593706
-
-      ########## CHILDREN_DELTA = [-0.3, -0.15, 0.0, 0.15, 0.3] ################
-      # traj length: 12.898756032515823
-      
-      ########## CHILDREN_DELTA = [-0.6, -0.3, 0.0, 0.3, 0.6]
-      # traj length: 12.098711900557902
-
-      ########## CHILDREN_DELTA = [-0.53, -0.265, 0.0, 0.265, 0.53]
-      # traj length: 12.398229837927044
-
-       ########## CHILDREN_DELTA = [-0.47, -0.235, 0.0, 0.235, 0.47]
-       # traj length: 12.199023142374802
-
-      ########## CHILDREN_DELTA = [-0.4, -0.2, 0.0, 0.2, 0.4]
-      # traj length:11.998929287263906
-
-      ########## CHILDREN_DELTA = [-0.7, -0.35, 0.0, 0.35, 0.7]
-      # traj length: 12.097732792113147
-
     return traj
 
   # changed arguments from starter code collision_found(self, node_1, node_2) to what it is now
@@ -297,12 +271,13 @@ if __name__ == '__main__':
   for i in range(0, 5):
     maxR = 10
     tp0 = [0, -8, -8, 0]
-    ### need two initial desired states ##
-
-  
-    tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
+    tp1 = []
     planner = A_Star_Planner()
     walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
+    shark = Shark((0, 0, 0), walls)
+    x, y, theta = shark.get_desired_state()
+    tp1 = [300, x, y, theta]
+    # Call below repeatedly
     objects = []
     num_objects = 25
     for j in range(0, num_objects): 
@@ -310,8 +285,12 @@ if __name__ == '__main__':
       while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
         obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
       objects.append(obj)
-    # objects = [[-9, -4, 1], [-7, -4, 1], [-5, -4, 1], [-3, -4, 1], [-1, -4, 1], [-4, -2, 1], [1, -4, 1], [3, 3, 0.5]]
-    traj = planner.construct_traj(tp0, tp1, objects, walls)
+    
+    traj = planner.construct_traj(tp0, tp1, objects, walls, shark)
+    shark.updateState()
+    x, y, theta = shark.get_desired_state()
+    tp1 = [300, x, y, theta]
+
     if len(traj) > 0:
       plot_traj(traj, traj, objects, walls)
 
