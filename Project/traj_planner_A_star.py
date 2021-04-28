@@ -58,7 +58,7 @@ class Shark():
 
   def updateState(self):
     x, y, theta = self.state
-    self.previous_state.append(self.state)
+    self.previous_states.append(self.state)
 
     not_valid = True
 
