@@ -121,8 +121,15 @@ def plot_traj(traj_desired, traj_actual, objects, walls, shark):
 
   # Create trajectory line
   x_y_start = (shark.state[0], shark.state[1])
-  x_y_end = ()
-  line = plt.Line2D((2, 8), (6, 6), lw=2.5)
+  theta = shark.state[2]
+  x_new = shark.state[0] + shark.MIN_DESIRED_RADIUS * math.cos(theta)
+  y_new = shark.state[1] + shark.MIN_DESIRED_RADIUS * math.sin(theta)
+  x_y_end = (x_new, y_new)
+
+  x_list = [x_y_start[0], x_y_end[0]] 
+  y_list = [x_y_start[1], x_y_end[1]] 
+
+  line = plt.Line2D(x_list, y_list, lw=2)
   axis_array[0].add_line(line)
 
   for w in walls:

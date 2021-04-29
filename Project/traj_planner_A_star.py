@@ -22,7 +22,7 @@ class Node():
 
   def getState(self):
     return self.state
-    
+
   def manhattan_distance_to_node(self, node):
     return abs(self.state[1] - node.state[1]) + abs(self.state[2] - node.state[2])
   
