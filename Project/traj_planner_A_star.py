@@ -1,5 +1,4 @@
 # E206 Motion Planning
-
 # Simple planner
 # C Clark
 
@@ -42,8 +41,8 @@ class Shark():
   DESIRED_STATE_THETA = 1.39626   # rad
   DESIRED_STATE_RADIUS = 2.5      # m  (will scale up if need be)
 
-  MIN_DESIRED_RADIUS = DESIRED_STATE_RADIUS - 1    # m
-  MAX_DESIRED_RADIUS = DESIRED_STATE_RADIUS + 1    # m
+  MIN_DESIRED_RADIUS = DESIRED_STATE_RADIUS - 0.75    # m
+  MAX_DESIRED_RADIUS = DESIRED_STATE_RADIUS + 0.75    # m
 
   def __init__(self, state, boundaries):
     self.state = state            # Contains [x, y, theta]
@@ -53,8 +52,8 @@ class Shark():
   def getState(self):
     return self.state
 
-  def euclidean_distance_to_state(self, state):
-    return math.sqrt( (self.state[1] - state[1])**2 + (self.state[2] - state[2])**2 )
+  def euclidean_distance_to_state(self, current_state, state):
+    return math.sqrt( (current_state[2] - state[1])**2 + (current_state[3] - state[2])**2 )
 
   def updateState(self):
     x, y, theta = self.state
@@ -77,10 +76,10 @@ class Shark():
       if x_min <= x <= x_max and y_min <= y <= y_max:
         not_valid = False  
 
-    theta = node_to_expand.state[3] + random_angle
+    theta = theta + random_angle
     self.state = (x, y, theta)
 
-  def get_desired_state(self):
+  def get_desired_state(self, current_state):
 
     x_min = self.boundaries[0][0]
     x_max = self.boundaries[0][2]
@@ -91,26 +90,30 @@ class Shark():
 
     x_des_1 = x + self.DESIRED_STATE_RADIUS * math.cos(theta + self.DESIRED_STATE_THETA)
     y_des_1 = y + self.DESIRED_STATE_RADIUS * math.sin(theta + self.DESIRED_STATE_THETA)
-    theta_des_1 = theta + 2 * self.DESIRED_STATE_THETA
-    state_1 = (x_des_1, y_des_1, theta_des_1)
+    state_1 = (x_des_1, y_des_1, theta)
+    
 
     x_des_2 = x + self.DESIRED_STATE_RADIUS * math.cos(theta - self.DESIRED_STATE_THETA)
     y_des_2 = y + self.DESIRED_STATE_RADIUS * math.sin(theta - self.DESIRED_STATE_THETA)
-    theta_des_2 = theta - 2 * self.DESIRED_STATE_THETA
-    state_2 = (x_des_2, y_des_2, theta_des_2)
+    state_2 = (x_des_2, y_des_2, theta)
     
+    # print(f"State1: {state_1}")
+    # print(f"State2: {state_2}")
+
     if not (x_min <= x_des_1 <= x_max and y_min <= y_des_1 <= y_max):
-      return state_2
+      return state_2 #2
 
     if not (x_min <= x_des_2 <= x_max and y_min <= y_des_2 <= y_max):
       return state_1
     
-    # Consider adding check for if state is in object
+    distance_to_1 = self.euclidean_distance_to_state(current_state, state_1)
+    distance_to_2 = self.euclidean_distance_to_state(current_state, state_2)
 
-    if self.euclidean_distance_to_state(state_1) <= self.euclidean_distance_to_state(state_2):
+    # Consider adding check for if state is in object
+    if distance_to_1 <= distance_to_2:
       return state_1
     
-    return state_2
+    return state_2 #2
 
 
 class A_Star_Planner():
@@ -268,31 +271,56 @@ class A_Star_Planner():
 
 
 if __name__ == '__main__':
-  for i in range(0, 5):
-    maxR = 10
-    tp0 = [0, -8, -8, 0]
-    tp1 = []
-    planner = A_Star_Planner()
-    walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
-    shark = Shark((0, 0, 0), walls)
-    x, y, theta = shark.get_desired_state()
-    tp1 = [300, x, y, theta]
-    # Call below repeatedly
-    objects = []
-    num_objects = 25
-    for j in range(0, num_objects): 
-      obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-      while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
-        obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-      objects.append(obj)
+  # for i in range(0, 5):
+  #   maxR = 10
+  #   tp0 = [0, -8, -8, 0]
+  #   tp1 = []
+  #   planner = A_Star_Planner()
+  #   walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
+  #   shark = Shark((0, 0, 0), walls)
+  #   x, y, theta = shark.get_desired_state()
+  #   tp1 = [300, x, y, theta]
+  #   # Call below repeatedly
+  #   objects = []
+  #   num_objects = 15
+  #   for j in range(0, num_objects): 
+  #     obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+  #     while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
+  #       obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+  #     objects.append(obj)
     
-    traj = planner.construct_traj(tp0, tp1, objects, walls, shark)
-    shark.updateState()
-    x, y, theta = shark.get_desired_state()
-    tp1 = [300, x, y, theta]
+  #   traj = planner.construct_traj(tp0, tp1, objects, walls, shark)
+  #   shark.updateState()
+  #   x, y, theta = shark.get_desired_state()
+  #   tp1 = [300, x, y, theta]
 
-    if len(traj) > 0:
-      plot_traj(traj, traj, objects, walls)
+  #   if len(traj) > 0:
+  #     plot_traj(traj, traj, objects, walls, shark)
+ 
+  maxR = 10
+  tp0 = [0, -8, -8, 0]
+  tp1 = []
+  planner = A_Star_Planner()
+  walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
+  shark = Shark((0, 0, 0), walls)
+  x, y, theta = shark.get_desired_state(tp0)
+  tp1 = [300, x, y, theta]
+  # Call below repeatedly
+  objects = []
+  num_objects = 20
+  for j in range(0, num_objects): 
+    obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+    while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
+      obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+    objects.append(obj)
+  
+  traj = planner.construct_traj(tp0, tp1, objects, walls, shark)
+  # shark.updateState()
+  # x, y, theta = shark.get_desired_state()
+  # tp1 = [300, x, y, theta]
+
+  if len(traj) > 0:
+    plot_traj(traj, traj, objects, walls, shark)
 
     # maxR = 10
     # tp0 = [0, -8, -8, 0]

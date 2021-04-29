@@ -11,22 +11,6 @@ DISTANCE_STEP_SIZE = 0.1 #m
 COLLISION_INDEX_STEP_SIZE = 5
 ROBOT_RADIUS = 0.4 #m
 
-# LAB 2 STARTER CODE
-# def construct_dubins_traj(traj_point_0, traj_point_1):
-#   """ Construc a trajectory in the X-Y space and in the time-X,Y,Theta space.
-#       Arguments:
-#         traj_point_0 (list of floats): The trajectory's first trajectory point with time, X, Y, Theta (s, m, m, rad).
-#         traj_point_1 (list of floats): The trajectory's last trajectory point with time, X, Y, Theta (s, m, m, rad).
-#       Returns:
-#         traj (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
-#         traj_distance (float): The length ofthe trajectory (m).
-#   """
-#   traj = []
-#   traj_distance = 0
-
-#   # Add code here      
-#   return traj, traj_distance
-
 def construct_dubins_traj(traj_point_0, traj_point_1):
   """ Construct a trajectory in the X-Y space and in the time-X,Y,Theta space.
       Arguments:
@@ -66,7 +50,7 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
   return traj, traj_distance
 
 
-def plot_traj(traj_desired, traj_actual, objects, walls):
+def plot_traj(traj_desired, traj_actual, objects, walls, shark):
   """ Plot a trajectory in the X-Y space and in the time-X,Y,Theta space.
       Arguments:
         desired_traj (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
@@ -110,11 +94,44 @@ def plot_traj(traj_desired, traj_actual, objects, walls):
     x_obj.append(x_obj[0])
     y_obj.append(y_obj[0])
     axis_array[0].plot(x_obj, y_obj, 'b')
+
+  # For the shark
+  # shark_x = []
+  # shark_y = []
+  # shark_ang = 0
+  # while shark_ang < 6.28:
+  #     shark_x.append(shark.state[0] + shark.DESIRED_STATE_RADIUS * math.cos(ang))
+  #     shark_y.append(shark.state[1] + shark.DESIRED_STATE_RADIUS * math.sin(ang))
+  #     shark_ang += ang_res
+  # shark_x.append(shark_x[0])
+  # shark_y.append(shark_y[0])
+  # axis_array[0].plot(shark_x, shark_y, 'r')
+  
+
+  # Create shark + disk
+
+  circle3 = plt.Circle( (shark.state[0], shark.state[1]), radius = shark.MAX_DESIRED_RADIUS, fill=False, ec='r')
+  axis_array[0].add_patch( circle3 )
+
+  circle2 = plt.Circle( (shark.state[0], shark.state[1]), radius = shark.MIN_DESIRED_RADIUS, fill=False, ec='y')
+  axis_array[0].add_patch( circle2 )
+
+  circle1 = plt.Circle( (shark.state[0], shark.state[1]), radius = 0.5, ec='g')
+  axis_array[0].add_patch( circle1 )
+
+  # Create trajectory line
+  x_y_start = (shark.state[0], shark.state[1])
+  x_y_end = ()
+  line = plt.Line2D((2, 8), (6, 6), lw=2.5)
+  axis_array[0].add_line(line)
+
   for w in walls:
     axis_array[0].plot([w[0], w[2]], [w[1], w[3]], 'k')
   axis_array[0].set_xlabel('X (m)')
   axis_array[0].set_ylabel('Y (m)')
   axis_array[0].axis('equal')
+
+  
   
   axis_array[1].plot(time_stamp_desired, x_desired,'b')
   axis_array[1].plot(time_stamp_desired, y_desired,'b--')
@@ -124,6 +141,7 @@ def plot_traj(traj_desired, traj_actual, objects, walls):
   axis_array[1].plot(time_stamp_actual, theta_actual,'k-.')
   axis_array[1].set_xlabel('Time (s)')
   axis_array[1].legend(['X Desired (m)', 'Y Desired (m)', 'Theta Desired (rad)', 'X (m)', 'Y (m)', 'Theta (rad)'])
+
 
   plt.show()
   
