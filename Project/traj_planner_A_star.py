@@ -1,11 +1,10 @@
-# E206 Motion Planning
-# Simple planner
-# C Clark
+# E206 Motion Planning Project
 
 import math
 import dubins
 import random
 import matplotlib.pyplot as plt
+import time
 from traj_planner_utils import *
 import numpy as np
 
@@ -158,7 +157,6 @@ class A_Star_Planner():
     return self.build_traj(goalNode)
 
   def add_to_fringe(self, node): 
-    # student written
     if len(self.fringe) == 0:
       self.fringe.append(node)
     else:
@@ -174,7 +172,6 @@ class A_Star_Planner():
   def get_children(self, node_to_expand):
     children_list = []
 
-    # Psuedocode from E206 site
     for i in range(len(self.CHILDREN_DELTAS)):
       CHILDREN_DELTA = self.CHILDREN_DELTAS[i]
       time = node_to_expand.state[0] + self.EDGE_TIME
@@ -182,7 +179,6 @@ class A_Star_Planner():
       y = node_to_expand.state[2] + self.DISTANCE_DELTA * math.sin(node_to_expand.state[3] + CHILDREN_DELTA)
       theta = node_to_expand.state[3] + 2 * CHILDREN_DELTA
       
-      # student written
       state = (time, x, y, theta)
       child = self.create_node(state, node_to_expand)
       children_list.append(child)
@@ -190,9 +186,7 @@ class A_Star_Planner():
     return children_list
 
   def generate_goal_node(self, node, desired_state):
-    # student written
     
-    # Add code here.
     collision, _ = self.collision_found(node.state, desired_state)
     if (not collision):
       goal_node = self.create_node(desired_state, node)
@@ -252,7 +246,7 @@ class A_Star_Planner():
       total_traj_distance += edge_traj_distance
       traj = traj + edge_traj
 
-    return traj
+    return traj, total_traj_distance
 
   # changed arguments from starter code collision_found(self, node_1, node_2) to what it is now
   def collision_found(self, state_1, state_2):
@@ -271,6 +265,42 @@ class A_Star_Planner():
 
 
 if __name__ == '__main__':
+
+  start_time = time.perf_counter()
+  maxR = 10
+  tp0 = [0, -8, -8, 0]
+  tp1 = []
+  planner = A_Star_Planner()
+  walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
+  shark = Shark((0, 0, 0), walls)
+  x, y, theta = shark.get_desired_state(tp0)
+  tp1 = [300, x, y, theta]
+  # Call below repeatedly
+  objects = []
+  num_objects = 20
+  for j in range(0, num_objects): 
+    obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+    while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
+      obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
+    objects.append(obj)
+  
+  traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
+  # shark.updateState()
+  # x, y, theta = shark.get_desired_state()
+  # tp1 = [300, x, y, theta]
+  end_time = time.perf_counter()
+
+  if len(traj) > 0:
+    print(f"Plan construction time: {end_time - start_time}")
+    print(f"Trajectory distance: {traj_distance}")
+    plot_traj(traj, traj, objects, walls, shark)
+
+
+
+
+
+
+
   # for i in range(0, 5):
   #   maxR = 10
   #   tp0 = [0, -8, -8, 0]
@@ -296,47 +326,3 @@ if __name__ == '__main__':
 
   #   if len(traj) > 0:
   #     plot_traj(traj, traj, objects, walls, shark)
- 
-  maxR = 10
-  tp0 = [0, -8, -8, 0]
-  tp1 = []
-  planner = A_Star_Planner()
-  walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
-  shark = Shark((0, 0, 0), walls)
-  x, y, theta = shark.get_desired_state(tp0)
-  tp1 = [300, x, y, theta]
-  # Call below repeatedly
-  objects = []
-  num_objects = 20
-  for j in range(0, num_objects): 
-    obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-    while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
-      obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-    objects.append(obj)
-  
-  traj = planner.construct_traj(tp0, tp1, objects, walls, shark)
-  # shark.updateState()
-  # x, y, theta = shark.get_desired_state()
-  # tp1 = [300, x, y, theta]
-
-  if len(traj) > 0:
-    plot_traj(traj, traj, objects, walls, shark)
-
-    # maxR = 10
-    # tp0 = [0, -8, -8, 0]
-    # tp1 = [20, 0, 0, 0]
-    # # tp1 = [300, random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0]
-    # planner = A_Star_Planner()
-    # walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
-    # # num_objects = 25
-    # # objects = []
-    # # for j in range(0, num_objects): 
-    # #   obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-    # #   while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
-    # #     obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
-    # #   objects.append(obj)
-    # objects = [[-8, -4, 1.5], [-3, -4, 1.5], [-1, -4, 1], [-5, -8, 1], [-2, -6, 1], [1, -4, 1]]
-    # traj = planner.construct_traj(tp0, tp1, objects, walls)
-    # print(total_traj_distance)
-    # if len(traj) > 0:
-    #   plot_traj(traj, traj, objects, walls)  
