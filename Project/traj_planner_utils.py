@@ -50,7 +50,7 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
   return traj, traj_distance
 
 
-def plot_traj(traj_desired, traj_actual, objects, walls, shark):
+def plot_traj(traj_desired, traj_actual, objects, walls, shark, goal_points):
   """ Plot a trajectory in the X-Y space and in the time-X,Y,Theta space.
       Arguments:
         desired_traj (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).

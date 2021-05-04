@@ -134,7 +134,7 @@ class A_Star_Planner():
         Returns:
           traj (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
     """
-    
+
     self.desired_state = desired_state
     self.objects = objects
     self.walls = walls
@@ -275,25 +275,40 @@ if __name__ == '__main__':
   shark = Shark((0, 0, 0), walls)
   x, y, theta = shark.get_desired_state(tp0)
   tp1 = [300, x, y, theta]
-  # Call below repeatedly
+  TIME_STEP = 1
+  num_objects = 10
   objects = []
-  num_objects = 20
+
   for j in range(0, num_objects): 
     obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
     while (abs(obj[0]-tp0[1]) < 1 and abs(obj[1]-tp0[2]) < 1) or (abs(obj[0]-tp1[1]) < 1 and abs(obj[1]-tp1[2]) < 1):
       obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
     objects.append(obj)
-  
+
+  total_traj = []
   traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
-  # shark.updateState()
-  # x, y, theta = shark.get_desired_state()
-  # tp1 = [300, x, y, theta]
+  total_traj+=traj
+  list_of_goal_points = []
+  # Call below repeatedly
+  for i in range(5):
+    
+    shark.updateState()
+    current_x, current_y, current_theta = shark.state
+    current_state = (i, current_x, current_y, current_theta)
+    x, y, theta = shark.get_desired_state(current_state)
+    print(shark.get_desired_state(current_state))
+    tp0 = total_traj[-1]
+    tp1 = [tp0[0] + TIME_STEP, x, y, theta]
+    traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
+    total_traj+=traj
+    list_of_goal_points+=tp0
+
   end_time = time.perf_counter()
 
-  if len(traj) > 0:
+  if len(total_traj) > 0:
     print(f"Plan construction time: {end_time - start_time}")
     print(f"Trajectory distance: {traj_distance}")
-    plot_traj(traj, traj, objects, walls, shark)
+    plot_traj(total_traj, total_traj, objects, walls, shark)
 
 
 
