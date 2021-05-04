@@ -301,14 +301,17 @@ if __name__ == '__main__':
     tp1 = [tp0[0] + TIME_STEP, x, y, theta]
     traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
     total_traj+=traj
-    list_of_goal_points+=tp0
+    list_of_goal_points.append(tp0)
 
   end_time = time.perf_counter()
+
+  previous_states = shark.previous_states
+  previous_states.append(shark.state)
 
   if len(total_traj) > 0:
     print(f"Plan construction time: {end_time - start_time}")
     print(f"Trajectory distance: {traj_distance}")
-    plot_traj(total_traj, total_traj, objects, walls, shark)
+    plot_traj(total_traj, total_traj, objects, walls, shark, list_of_goal_points, previous_states)
 
 
 

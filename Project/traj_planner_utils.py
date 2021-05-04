@@ -50,7 +50,7 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
   return traj, traj_distance
 
 
-def plot_traj(traj_desired, traj_actual, objects, walls, shark, goal_points):
+def plot_traj(traj_desired, traj_actual, objects, walls, shark, goal_points, shark_previous_states):
   """ Plot a trajectory in the X-Y space and in the time-X,Y,Theta space.
       Arguments:
         desired_traj (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
@@ -118,6 +118,11 @@ def plot_traj(traj_desired, traj_actual, objects, walls, shark, goal_points):
 
   circle1 = plt.Circle( (shark.state[0], shark.state[1]), radius = 0.5, ec='g')
   axis_array[0].add_patch( circle1 )
+
+  # Create x's on each goal point
+  for goal in goal_points:
+    axis_array[0].plot(goal[1], goal[2], 'kx')
+
 
   # Create trajectory line
   x_y_start = (shark.state[0], shark.state[1])
