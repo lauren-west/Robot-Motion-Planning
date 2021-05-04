@@ -43,6 +43,8 @@ class Shark():
   MIN_DESIRED_RADIUS = DESIRED_STATE_RADIUS - 0.75    # m
   MAX_DESIRED_RADIUS = DESIRED_STATE_RADIUS + 0.75    # m
 
+  TIME_STEP = 1     # sec
+
   def __init__(self, state, boundaries):
     self.state = state            # Contains [x, y, theta]
     self.previous_states = []
@@ -56,7 +58,11 @@ class Shark():
 
   def updateState(self):
     x, y, theta = self.state
-    self.previous_states.append(self.state)
+    if self.previous_states == []:
+      self.previous_states.append((0, x, y, theta))
+    else:
+      time = self.previous_states[-1][0] + TIME_STEP
+      self.previous_states.append((time, x, y, theta))
 
     not_valid = True
 
@@ -120,7 +126,7 @@ class A_Star_Planner():
   DIST_TO_GOAL_THRESHOLD = 0.5 #m
   CHILDREN_DELTAS = [-0.5, -0.25, 0.0, 0.25, 0.5]
   DISTANCE_DELTA = 1.5 #m
-  EDGE_TIME = 10 #s
+  EDGE_TIME = 5 #s
   LARGE_NUMBER = 9999999
 
   def __init__(self):
@@ -140,21 +146,27 @@ class A_Star_Planner():
     self.walls = walls
     self.fringe = []
     self.shark = shark
-    
+
+    start_time = time.perf_counter()
 
     initial_node = self.create_initial_node(initial_state)
     self.fringe.append(initial_node)
 
-    while self.generate_goal_node(self.fringe[0], desired_state) == None:
-      newNode = self.get_best_node_on_fringe()
-      children_list = self.get_children(newNode)
-      for child in children_list:
-        self.add_to_fringe(child)
-    
-    new_desired = (self.fringe[0].state[0] + self.EDGE_TIME, desired_state[1], desired_state[2], desired_state[3])
-    goalNode = self.generate_goal_node(self.fringe[0], new_desired)
+    closest_node = None
 
-    return self.build_traj(goalNode)
+    while time.perf_counter() - start_time < 2:
+      while self.generate_goal_node(self.fringe[0], desired_state) == None:
+        newNode = self.get_best_node_on_fringe()
+        children_list = self.get_children(newNode)
+        for child in children_list:
+          self.add_to_fringe(child)
+      
+      new_desired = (self.fringe[0].state[0] + self.EDGE_TIME, desired_state[1], desired_state[2], desired_state[3])
+      goalNode = self.generate_goal_node(self.fringe[0], new_desired)
+
+      return self.build_traj(goalNode)
+    
+    return self.build_traj(closest_node)
 
   def add_to_fringe(self, node): 
     if len(self.fringe) == 0:
@@ -248,6 +260,26 @@ class A_Star_Planner():
 
     return traj, total_traj_distance
 
+  def build_shark_traj(self, all_states):
+    
+    global total_traj_distance
+    total_traj_distance = 0
+
+    print(all_states)
+    traj = []
+    for i in range(1,len(all_states)):
+      traj_point_0 = all_states[i-1]
+      traj_point_1 = all_states[i]
+      traj_point_1 = list(traj_point_1)
+      traj_point_1[3] = math.atan2(traj_point_1[2]-traj_point_0[2], traj_point_1[1]-traj_point_0[1])
+      traj_point_1 = tuple(traj_point_1)
+      edge_traj, edge_traj_distance = construct_dubins_traj(traj_point_0, traj_point_1)
+      
+      total_traj_distance += edge_traj_distance
+      traj = traj + edge_traj
+
+    return traj, total_traj_distance
+
   # changed arguments from starter code collision_found(self, node_1, node_2) to what it is now
   def collision_found(self, state_1, state_2):
     """ Return true if there is a collision with the traj between 2 nodes and the workspace
@@ -263,6 +295,12 @@ class A_Star_Planner():
     traj, traj_distance = construct_dubins_traj(state_1, state_2)
     return collision_found(traj, self.objects, self.walls), traj_distance
 
+  def update_objects(self):
+    max_change = 1  # m. Both negative and positive
+    for obstacle in self.objects:
+      obstacle[0] += random.uniform(-max_change, max_change)
+      obstacle[1] += random.uniform(-max_change, max_change)
+      
 
 if __name__ == '__main__':
 
@@ -285,14 +323,22 @@ if __name__ == '__main__':
       obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
     objects.append(obj)
 
+  time_in_disk = 0
   total_traj = []
   traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
+
+  for point in traj:
+    distance_from_shark = shark.euclidean_distance_to_state(point, shark.state)
+    if shark.MAX_DESIRED_RADIUS > distance_from_shark > shark.MIN_DESIRED_RADIUS:
+      time_in_disk += 1
+  
   total_traj+=traj
   list_of_goal_points = []
   # Call below repeatedly
-  for i in range(5):
+  for i in range(10):
     
     shark.updateState()
+    planner.update_objects()
     current_x, current_y, current_theta = shark.state
     current_state = (i, current_x, current_y, current_theta)
     x, y, theta = shark.get_desired_state(current_state)
@@ -300,18 +346,33 @@ if __name__ == '__main__':
     tp0 = total_traj[-1]
     tp1 = [tp0[0] + TIME_STEP, x, y, theta]
     traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
+
+    for point in traj:
+      distance_from_shark = shark.euclidean_distance_to_state(point, shark.state)
+      if shark.MAX_DESIRED_RADIUS > distance_from_shark > shark.MIN_DESIRED_RADIUS:
+        time_in_disk += 1
+
     total_traj+=traj
     list_of_goal_points.append(tp0)
 
   end_time = time.perf_counter()
 
   previous_states = shark.previous_states
-  previous_states.append(shark.state)
+  x, y, theta = shark.state
+  time = shark.previous_states[-1][0] + TIME_STEP
+  previous_states.append((time, x, y, theta))
+
+  shark_traj, shark_cost = planner.build_shark_traj(previous_states)
 
   if len(total_traj) > 0:
     print(f"Plan construction time: {end_time - start_time}")
     print(f"Trajectory distance: {traj_distance}")
-    plot_traj(total_traj, total_traj, objects, walls, shark, list_of_goal_points, previous_states)
+    print(f"Shark trajectory distnace: {shark_cost}")
+    print(f"The number of time steps with the AUV in the shark disk: {time_in_disk}.")
+    print(f"The number of time steps in total: {len(total_traj)}.")
+    print(f"The percent of time steps within the disk: {time_in_disk / len(total_traj)}.")
+    plot_traj(total_traj, total_traj, objects, walls, shark, list_of_goal_points, shark_traj)
+    animationAll(total_traj, shark_traj)
 
 
 

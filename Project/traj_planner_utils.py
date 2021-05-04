@@ -3,6 +3,9 @@
 # Simple planner
 # C Clark
 
+import numpy as np
+import matplotlib.animation as animation
+
 import math
 import dubins
 import matplotlib.pyplot as plt
@@ -50,7 +53,7 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
   return traj, traj_distance
 
 
-def plot_traj(traj_desired, traj_actual, objects, walls, shark, goal_points, shark_previous_states):
+def plot_traj(traj_desired, traj_actual, objects, walls, shark, goal_points, shark_traj):
   """ Plot a trajectory in the X-Y space and in the time-X,Y,Theta space.
       Arguments:
         desired_traj (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
@@ -81,6 +84,19 @@ def plot_traj(traj_desired, traj_actual, objects, walls, shark, goal_points, sha
     y_actual.append(tp[2])
     theta_actual.append(angle_diff(tp[3]))
   axis_array[0].plot(x_actual, y_actual, 'k')
+
+  time_stamp_shark = []
+  x_shark = []
+  y_shark = []
+  theta_shark = []
+  for tp in shark_traj:
+    time_stamp_shark.append(tp[0])
+    x_shark.append(tp[1])
+    y_shark.append(tp[2])
+    theta_shark.append(angle_diff(tp[3]))
+  axis_array[0].plot(x_shark, y_shark, 'g')
+  axis_array[0].plot(x_shark[0], y_shark[0], 'ro')
+  axis_array[0].plot(x_shark[-1], y_shark[-1], 'rx')
 
   ang_res = 0.2
   for o in objects:
@@ -234,6 +250,79 @@ def angle_diff(ang):
 
   return ang
   
+#################################################################
+# animation function 
+
+
+def animationAll(total_traj, shark_traj):
+  # plt.style.use('dark_background')
+  traj = total_traj
+  fig = plt.figure() 
+  ax = plt.axes(xlim=(-10, 10), ylim=(-10, 10)) 
+  line, = ax.plot([], [], lw=2) 
+  line_shark, = ax.plot([], [], lw=2)
+
+  # lists to store x and y axis points 
+  xdata, ydata = [], [] 
+  xsharkdata, ysharkdata = [], [] 
+  multiple = len(traj)//len(shark_traj)
+  print(mulitple)
+  
+  def init(): 
+    # creating an empty plot/frame 
+    line.set_data([], []) 
+    line_shark.set_data([], [])
+    return line, line_shark 
+
+  def animate(i): 
+    
+
+    # t is a parameter 
+    t = i
+    
+    # x, y values to be plotted 
+    step = t 
+    
+    for j in range(len(multiple)):
+      x = traj[step][1]
+      y = traj[step][2]
+      xdata.append(x) 
+      ydata.append(y) 
+      step += 1/multiple
+
+   # x, y values to be plotted 
+    
+    xshark = shark_traj[t - t % multiple][1]
+    yshark = shark_traj[t - t % multiple][2]
+
+    
+    # appending new points to x, y axes points list  
+    line.set_data(xdata, ydata) 
+
+    #appending new points to x y shark traj
+    xsharkdata.append(xshark) 
+    ysharkdata.append(yshark) 
+    line_shark .set_data(xsharkdata, ysharkdata) 
+    return line, line_shark 
+
+  # initialization function 
+  
+  
+  # setting a title for the plot 
+  plt.title('Plotting AUV Traj!') 
+  # hiding the axis details 
+  # plt.axis('off') 
+
+  # call the animator	 
+  anim = animation.FuncAnimation(fig, animate, init_func=init, 
+                frames=len(total_traj) * multiple, interval=40, blit=True) 
+  
+  plt.show()
+
+  # save the animation as mp4 video file 
+  # anim.save('coil.gif',writer='imagemagick')
+#################################################################
+  
 if __name__ == '__main__':
   tp0 = [0,0,0,0]
   tp1 = [10,4,-4, -1.57]
@@ -242,3 +331,5 @@ if __name__ == '__main__':
   walls = [[-maxR, maxR, maxR, maxR], [maxR, maxR, maxR, -maxR], [maxR, -maxR, -maxR, -maxR], [-maxR, -maxR, -maxR, maxR] ]
   objects = [[4, 0, 1.0], [-2, -3, 1.5]]
   plot_traj(traj, objects, walls)
+
+
