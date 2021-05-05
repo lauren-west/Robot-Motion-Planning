@@ -267,6 +267,17 @@ def animationAll(total_traj, shark_traj, objects, shark):
   circle2 = plt.Circle( (shark.state[0], shark.state[1]), radius = shark.MIN_DESIRED_RADIUS, fill=False, ec='y')
   circle3 = plt.Circle( (shark.state[0], shark.state[1]), radius = shark.MAX_DESIRED_RADIUS, fill=False, ec='r')
   
+  print(objects)
+  objcir1 = plt.Circle( (objects[0][0][1], objects[0][0][2]), radius = 0.5, fill=False, ec='g')
+  objcir2 = plt.Circle( (objects[1][0][1], objects[1][0][2]), radius = 0.5, fill=False, ec='g')
+  objcir3 = plt.Circle( (objects[2][0][1], objects[2][0][2]), radius = 0.5, fill=False, ec='g')
+  objcir4 = plt.Circle( (objects[3][0][1], objects[3][0][2]), radius = 0.5, fill=False, ec='g')
+  objcir5 = plt.Circle( (objects[4][0][1], objects[4][0][2]), radius = 0.5, fill=False, ec='g')
+  objcir6 = plt.Circle( (objects[5][0][1], objects[5][0][2]), radius = 0.5, fill=False, ec='g')
+  objcir7 = plt.Circle( (objects[6][0][1], objects[6][0][2]), radius = 0.5, fill=False, ec='g')
+  
+
+
   # lists to store x and y axis points 
   xdata, ydata = [], [] 
   xsharkdata, ysharkdata = [], [] 
@@ -286,10 +297,28 @@ def animationAll(total_traj, shark_traj, objects, shark):
     circle2.center = (x, y)
     circle3.center = (x, y)
 
-    ####OBJECT######
+    ####OBJECTs######            
     # 1
-    objcir1.center = 
+    objcir1.center = (objects[0][0][1], objects[0][0][2])
     ax.add_patch(objcir1)
+    #2
+    objcir2.center = (objects[1][0][1], objects[1][0][2])
+    ax.add_patch(objcir2)
+    #3
+    objcir3.center = (objects[2][0][1], objects[2][0][2])
+    ax.add_patch(objcir3)
+    #4
+    objcir4.center = (objects[3][0][1], objects[3][0][2])
+    ax.add_patch(objcir4)
+    #5
+    objcir5.center = (objects[4][0][1], objects[4][0][2])
+    ax.add_patch(objcir5)
+    #6
+    objcir6.center = (objects[5][0][1], objects[5][0][2])
+    ax.add_patch(objcir6)
+    #7
+    objcir7.center = (objects[6][0][1], objects[6][0][2])
+    ax.add_patch(objcir7)
 
     ax.add_patch(circle2)
     ax.add_patch(circle3)
@@ -301,9 +330,15 @@ def animationAll(total_traj, shark_traj, objects, shark):
     cirx, ciry = circle2.center
     cir3x, cir3y = circle3.center
 
-    ####OBJECT######
-    #1
+    ####OBJECTS######
+    #1-7
     objcir1x, objcir1y = objcir1.center
+    objcir2x, objcir1y = objcir2.center
+    objcir3x, objcir1y = objcir3.center
+    objcir4x, objcir1y = objcir4.center
+    objcir5x, objcir1y = objcir5.center
+    objcir6x, objcir1y = objcir6.center
+    objcir7x, objcir1y = objcir7.center
     
     # x, y values to be plotted 
     step = t * multiple
@@ -333,10 +368,22 @@ def animationAll(total_traj, shark_traj, objects, shark):
       ciry = shark_traj[t][2]
       cir3x = shark_traj[t][1]
       cir3y = shark_traj[t][2]
-      ####OBJECT######
-      #1
-      objcir1x = obj_traj[t][1]
-      objcir1y = obj_traj[t][2]
+      ####OBJECTS######             WRONG
+      #1-7 
+      objcir1x = objects[0][t][1]
+      objcir1y = objects[0][t][2]
+      objcir2x = objects[1][t][1]
+      objcir2y = objects[1][t][2]
+      objcir3x = objects[2][t][1]
+      objcir3y = objects[2][t][2]
+      objcir4x = objects[3][t][1]
+      objcir4y = objects[3][t][2]
+      objcir5x = objects[4][t][1]
+      objcir5y = objects[4][t][2]
+      objcir6x = objects[5][t][1]
+      objcir6y = objects[5][t][2]
+      objcir7x = objects[6][t][1]
+      objcir7y = objects[6][t][2]
       
     else:
       xshark = shark_traj[-1][1]
@@ -346,10 +393,23 @@ def animationAll(total_traj, shark_traj, objects, shark):
       ciry = shark_traj[-1][2]
       cir3x = shark_traj[-1][1]
       cir3y = shark_traj[-1][2]
-      ####OBJECT######
+      ####OBJECT######                
       #1
-      objcir1x = obj_traj[-1][1]
-      objcir1y = obj_traj[-1][2]
+      objcir1x = objects[0][-1][1]
+      objcir1y = objects[0][-1][2]
+      objcir2x = objects[1][-1][1]
+      objcir2y = objects[1][-1][2]
+      objcir3x = objects[2][-1][1]
+      objcir3y = objects[2][-1][2]
+      objcir4x = objects[3][-1][1]
+      objcir4y = objects[3][-1][2]
+      objcir5x = objects[4][-1][1]
+      objcir5y = objects[4][-1][2]
+      objcir6x = objects[5][-1][1]
+      objcir6y = objects[5][-1][2]
+      objcir7x = objects[6][-1][1]
+      objcir7y = objects[6][-1][2]
+
 
     # appending new points to x, y axes points list  
     line.set_data(xdata, ydata)
@@ -365,8 +425,15 @@ def animationAll(total_traj, shark_traj, objects, shark):
     ####OBJECT######
     #1
     objcir1.center = (objcir1x, objcir1y)
+    objcir2.center = (objcir2x, objcir2y)
+    objcir3.center = (objcir3x, objcir3y)
+    objcir4.center = (objcir4x, objcir4y)
+    objcir5.center = (objcir5x, objcir5y)
+    objcir6.center = (objcir6x, objcir6y)
+    objcir7.center = (objcir7x, objcir7y)
+
     
-    return line, line_shark, circle2, circle3, objcir1
+    return line, line_shark, circle2, circle3, objcir1, objcir2, objcir3, objcir4, objcir5, objcir6, objcir7
 
   # initialization function 
   
@@ -396,5 +463,3 @@ if __name__ == '__main__':
   objects = [[4, 0, 1.0], [-2, -3, 1.5]]
   plot_traj(traj, objects, walls)
 
-
-j

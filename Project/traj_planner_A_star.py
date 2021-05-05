@@ -291,25 +291,20 @@ class A_Star_Planner():
     global total_traj_distance
     total_traj_distance = 0
 
+    print(f"Previous objects: {previous_objects}")
     all_trajs = []
+    for j in range(len(previous_objects[0][0])):
+      states = []
+      for i in range(len(previous_objects[0])):
+        x = previous_objects[i][j][0]
+        y = previous_objects[i][j][1]
+        states.append((0, x, y, 0))
+      print(f"States: {states}")
+      traj, traj_distance = self.build_shark_traj(states)
+      all_trajs.append(traj)
+      total_traj_distance += traj_distance
 
-    for j in range(len(previous_objects[0])):
-      for i in range(len(previous_objects)):
-        
-
-    for object_list in previ:us_objects
-      
-      traj_point_0 = all_states[i-1]
-      traj_point_1 = all_states[i]
-      traj_point_1 = list(traj_point_1)
-      traj_point_1[3] = math.atan2(traj_point_1[2]-traj_point_0[2], traj_point_1[1]-traj_point_0[1])
-      traj_point_1 = tuple(traj_point_1)
-      edge_traj, edge_traj_distance = construct_dubins_traj(traj_point_0, traj_point_1)
-      
-      total_traj_distance += edge_traj_distance
-      traj = traj + edge_traj
-
-    return traj, total_traj_distance
+    return all_trajs, total_traj_distance
 
   # changed arguments from starter code collision_found(self, node_1, node_2) to what it is now
   def collision_found(self, state_1, state_2):
@@ -346,7 +341,7 @@ if __name__ == '__main__':
   x, y, theta = shark.get_desired_state(tp0)
   tp1 = [300, x, y, theta]
   TIME_STEP = 1
-  num_objects = 10
+  num_objects = 7
   objects = []
 
   for j in range(0, num_objects): 
@@ -377,7 +372,6 @@ if __name__ == '__main__':
     current_x, current_y, current_theta = shark.state
     current_state = (i, current_x, current_y, current_theta)
     x, y, theta = shark.get_desired_state(current_state)
-    print(shark.get_desired_state(current_state))
     tp0 = total_traj[-1]
     tp1 = [tp0[0] + TIME_STEP, x, y, theta]
     traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
@@ -405,13 +399,13 @@ if __name__ == '__main__':
 
   if len(total_traj) > 0:
     print(f"Plan construction time: {end_time - start_time}")
-    print(f"Trajectory distance: {traj_distance}")
+    print(f"Trajectory distance: {total_traj_distance}")
     print(f"Shark trajectory distance: {shark_cost}")
     print(f"The number of time steps with the AUV in the shark disk: {time_in_disk}.")
     print(f"The number of time steps in total: {len(total_traj)}.")
     print(f"The percent of time steps within the disk: {time_in_disk / len(total_traj)}.")
     plot_traj(total_traj, total_traj, objects, walls, shark, list_of_goal_points, shark_traj)
-    animationAll(total_traj, shark_traj, objects, shark)
+    animationAll(total_traj, shark_traj, object_trajs, shark)
    
 
 
