@@ -143,6 +143,7 @@ class A_Star_Planner():
 
     self.desired_state = desired_state
     self.objects = objects
+    self.previous_objects = []
     self.walls = walls
     self.fringe = []
     self.shark = shark
@@ -271,9 +272,33 @@ class A_Star_Planner():
     global total_traj_distance
     total_traj_distance = 0
 
-    print(all_states)
     traj = []
     for i in range(1,len(all_states)):
+      traj_point_0 = all_states[i-1]
+      traj_point_1 = all_states[i]
+      traj_point_1 = list(traj_point_1)
+      traj_point_1[3] = math.atan2(traj_point_1[2]-traj_point_0[2], traj_point_1[1]-traj_point_0[1])
+      traj_point_1 = tuple(traj_point_1)
+      edge_traj, edge_traj_distance = construct_dubins_traj(traj_point_0, traj_point_1)
+      
+      total_traj_distance += edge_traj_distance
+      traj = traj + edge_traj
+
+    return traj, total_traj_distance
+
+  def build_object_traj(self, previous_objects):
+    
+    global total_traj_distance
+    total_traj_distance = 0
+
+    all_trajs = []
+
+    for j in range(len(previous_objects[0])):
+      for i in range(len(previous_objects)):
+        
+
+    for object_list in previ:us_objects
+      
       traj_point_0 = all_states[i-1]
       traj_point_1 = all_states[i]
       traj_point_1 = list(traj_point_1)
@@ -303,6 +328,7 @@ class A_Star_Planner():
 
   def update_objects(self):
     max_change = 1  # m. Both negative and positive
+    self.previous_objects.append(self.objects)
     for obstacle in self.objects:
       obstacle[0] += random.uniform(-max_change, max_change)
       obstacle[1] += random.uniform(-max_change, max_change)
@@ -372,7 +398,10 @@ if __name__ == '__main__':
   time = shark.previous_states[-1][0] + TIME_STEP
   previous_states.append((time, x, y, theta))
 
+  planner.previous_objects.append(planner.objects)
+
   shark_traj, shark_cost = planner.build_shark_traj(previous_states)
+  object_trajs, total_cost = planner.build_object_traj(planner.previous_objects)
 
   if len(total_traj) > 0:
     print(f"Plan construction time: {end_time - start_time}")

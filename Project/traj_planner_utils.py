@@ -280,18 +280,30 @@ def animationAll(total_traj, shark_traj, objects, shark):
     # creating an empty plot/frame 
     line.set_data([], []) 
     line_shark.set_data([], [])
+
     x, y, _ = shark.state
+
     circle2.center = (x, y)
     circle3.center = (x, y)
+
+    ####OBJECT######
+    # 1
+    objcir1.center = 
+    ax.add_patch(objcir1)
+
     ax.add_patch(circle2)
     ax.add_patch(circle3)
-    return line, line_shark, circle2, circle3
+    return line, line_shark, circle2, circle3, objcir1
 
   def animate(i): 
     # t is a parameter 
     t = i
     cirx, ciry = circle2.center
     cir3x, cir3y = circle3.center
+
+    ####OBJECT######
+    #1
+    objcir1x, objcir1y = objcir1.center
     
     # x, y values to be plotted 
     step = t * multiple
@@ -321,6 +333,10 @@ def animationAll(total_traj, shark_traj, objects, shark):
       ciry = shark_traj[t][2]
       cir3x = shark_traj[t][1]
       cir3y = shark_traj[t][2]
+      ####OBJECT######
+      #1
+      objcir1x = obj_traj[t][1]
+      objcir1y = obj_traj[t][2]
       
     else:
       xshark = shark_traj[-1][1]
@@ -330,6 +346,10 @@ def animationAll(total_traj, shark_traj, objects, shark):
       ciry = shark_traj[-1][2]
       cir3x = shark_traj[-1][1]
       cir3y = shark_traj[-1][2]
+      ####OBJECT######
+      #1
+      objcir1x = obj_traj[-1][1]
+      objcir1y = obj_traj[-1][2]
 
     # appending new points to x, y axes points list  
     line.set_data(xdata, ydata)
@@ -341,8 +361,12 @@ def animationAll(total_traj, shark_traj, objects, shark):
     line_shark.set_data(xsharkdata, ysharkdata) 
     circle2.center = (cirx, ciry)
     circle3.center = (cir3x, cir3y)
+
+    ####OBJECT######
+    #1
+    objcir1.center = (objcir1x, objcir1y)
     
-    return line, line_shark, circle2, circle3 
+    return line, line_shark, circle2, circle3, objcir1
 
   # initialization function 
   
@@ -373,3 +397,4 @@ if __name__ == '__main__':
   plot_traj(traj, objects, walls)
 
 
+j
