@@ -254,56 +254,95 @@ def angle_diff(ang):
 # animation function 
 
 
-def animationAll(total_traj, shark_traj):
+def animationAll(total_traj, shark_traj, objects, shark):
   # plt.style.use('dark_background')
   traj = total_traj
   fig = plt.figure() 
-  ax = plt.axes(xlim=(-10, 10), ylim=(-10, 10)) 
+  fig.set_dpi(100)
+  fig.set_size_inches(7, 6.5)
+  ax = plt.axes(xlim=(-15, 15), ylim=(-15, 15)) 
   line, = ax.plot([], [], lw=2) 
   line_shark, = ax.plot([], [], lw=2)
 
+  circle2 = plt.Circle( (shark.state[0], shark.state[1]), radius = shark.MIN_DESIRED_RADIUS, fill=False, ec='y')
+  circle3 = plt.Circle( (shark.state[0], shark.state[1]), radius = shark.MAX_DESIRED_RADIUS, fill=False, ec='r')
+  
   # lists to store x and y axis points 
   xdata, ydata = [], [] 
   xsharkdata, ysharkdata = [], [] 
+  # cirxdata, cirydata = [], [] 
+  # cir3xdata, cir3ydata = [], [] 
   multiple = len(traj)//len(shark_traj)
-  print(mulitple)
+  
+  difference = len(total_traj) - len(shark_traj) * multiple
   
   def init(): 
     # creating an empty plot/frame 
     line.set_data([], []) 
     line_shark.set_data([], [])
-    return line, line_shark 
+    x, y, _ = shark.state
+    circle2.center = (x, y)
+    circle3.center = (x, y)
+    ax.add_patch(circle2)
+    ax.add_patch(circle3)
+    return line, line_shark, circle2, circle3
 
   def animate(i): 
-    
-
     # t is a parameter 
     t = i
+    cirx, ciry = circle2.center
+    cir3x, cir3y = circle3.center
     
     # x, y values to be plotted 
-    step = t 
-    
-    for j in range(len(multiple)):
+    step = t * multiple
+
+    for j in range(multiple):
       x = traj[step][1]
       y = traj[step][2]
-      xdata.append(x) 
-      ydata.append(y) 
-      step += 1/multiple
+      xdata.append(x)
+      ydata.append(y)
+      step += 1
 
-   # x, y values to be plotted 
-    
-    xshark = shark_traj[t - t % multiple][1]
-    yshark = shark_traj[t - t % multiple][2]
+    # x, y values to be plotted 
+    # if t <= difference:
+    #   xshark = shark_traj[0][1]
+    #   yshark = shark_traj[0][2]
 
-    
+    #   cirx = shark_traj[0][1]
+    #   ciry = shark_traj[0][2]
+    #   cir3x = shark_traj[0][1]
+    #   cir3y = shark_traj[0][2]
+
+    if (t < len(shark_traj)):  #and t > difference
+      xshark = shark_traj[t][1]
+      yshark = shark_traj[t][2]
+
+      cirx = shark_traj[t][1]
+      ciry = shark_traj[t][2]
+      cir3x = shark_traj[t][1]
+      cir3y = shark_traj[t][2]
+      
+    else:
+      xshark = shark_traj[-1][1]
+      yshark = shark_traj[-1][2]
+      
+      cirx = shark_traj[-1][1]
+      ciry = shark_traj[-1][2]
+      cir3x = shark_traj[-1][1]
+      cir3y = shark_traj[-1][2]
+
     # appending new points to x, y axes points list  
-    line.set_data(xdata, ydata) 
+    line.set_data(xdata, ydata)
 
     #appending new points to x y shark traj
-    xsharkdata.append(xshark) 
-    ysharkdata.append(yshark) 
-    line_shark .set_data(xsharkdata, ysharkdata) 
-    return line, line_shark 
+    xsharkdata.append(xshark)
+    ysharkdata.append(yshark)
+    
+    line_shark.set_data(xsharkdata, ysharkdata) 
+    circle2.center = (cirx, ciry)
+    circle3.center = (cir3x, cir3y)
+    
+    return line, line_shark, circle2, circle3 
 
   # initialization function 
   
@@ -315,7 +354,8 @@ def animationAll(total_traj, shark_traj):
 
   # call the animator	 
   anim = animation.FuncAnimation(fig, animate, init_func=init, 
-                frames=len(total_traj) * multiple, interval=40, blit=True) 
+                frames=len(total_traj), interval=40, blit=True) 
+  
   
   plt.show()
 

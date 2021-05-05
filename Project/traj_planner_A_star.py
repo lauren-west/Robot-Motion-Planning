@@ -40,8 +40,8 @@ class Shark():
   DESIRED_STATE_THETA = 1.39626   # rad
   DESIRED_STATE_RADIUS = 2.5      # m  (will scale up if need be)
 
-  MIN_DESIRED_RADIUS = DESIRED_STATE_RADIUS - 0.75    # m
-  MAX_DESIRED_RADIUS = DESIRED_STATE_RADIUS + 0.75    # m
+  MIN_DESIRED_RADIUS = DESIRED_STATE_RADIUS - 1    # m
+  MAX_DESIRED_RADIUS = DESIRED_STATE_RADIUS + 1.2    # m
 
   TIME_STEP = 1     # sec
 
@@ -68,7 +68,7 @@ class Shark():
 
     while not_valid:
       random_distance = random.randint(self.MIN_RAND_DISTANCE, self.MAX_RAND_DISTANCE)
-      random_angle = random.uniform(self.MAX_DELTA_THETA, self.MAX_DELTA_THETA)
+      random_angle = random.uniform(-self.MAX_DELTA_THETA, self.MAX_DELTA_THETA)
       
       x = x + random_distance * math.cos(theta + random_angle)
       y = y + random_distance * math.sin(theta + random_angle)
@@ -152,9 +152,10 @@ class A_Star_Planner():
     initial_node = self.create_initial_node(initial_state)
     self.fringe.append(initial_node)
 
-    closest_node = None
+    self.closest_node = initial_node
+    self.shortest_distance = 10000
 
-    while time.perf_counter() - start_time < 2:
+    while time.perf_counter() - start_time < 1:
       while self.generate_goal_node(self.fringe[0], desired_state) == None:
         newNode = self.get_best_node_on_fringe()
         children_list = self.get_children(newNode)
@@ -168,7 +169,12 @@ class A_Star_Planner():
     
     return self.build_traj(closest_node)
 
-  def add_to_fringe(self, node): 
+  def add_to_fringe(self, node):
+    distance_to_shark = self.shark.euclidean_distance_to_state(node.state, shark.state)
+    if distance_to_shark < self.shortest_distance:
+      self.closest_node = node
+      self.shortest_distance = distance_to_shark
+      
     if len(self.fringe) == 0:
       self.fringe.append(node)
     else:
@@ -305,8 +311,8 @@ class A_Star_Planner():
 if __name__ == '__main__':
 
   start_time = time.perf_counter()
-  maxR = 10
-  tp0 = [0, -8, -8, 0]
+  maxR = 15
+  tp0 = [0, -2, -2, 0]
   tp1 = []
   planner = A_Star_Planner()
   walls = [[-maxR, maxR, maxR, maxR, 2*maxR], [maxR, maxR, maxR, -maxR, 2*maxR], [maxR, -maxR, -maxR, -maxR, 2*maxR], [-maxR, -maxR, -maxR, maxR, 2*maxR] ]
@@ -325,7 +331,10 @@ if __name__ == '__main__':
 
   time_in_disk = 0
   total_traj = []
+  total_traj_distance = 0
   traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
+
+  total_traj_distance += traj_distance
 
   for point in traj:
     distance_from_shark = shark.euclidean_distance_to_state(point, shark.state)
@@ -335,7 +344,7 @@ if __name__ == '__main__':
   total_traj+=traj
   list_of_goal_points = []
   # Call below repeatedly
-  for i in range(10):
+  for i in range(5):
     
     shark.updateState()
     planner.update_objects()
@@ -346,6 +355,7 @@ if __name__ == '__main__':
     tp0 = total_traj[-1]
     tp1 = [tp0[0] + TIME_STEP, x, y, theta]
     traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
+    total_traj_distance += traj_distance
 
     for point in traj:
       distance_from_shark = shark.euclidean_distance_to_state(point, shark.state)
@@ -367,12 +377,13 @@ if __name__ == '__main__':
   if len(total_traj) > 0:
     print(f"Plan construction time: {end_time - start_time}")
     print(f"Trajectory distance: {traj_distance}")
-    print(f"Shark trajectory distnace: {shark_cost}")
+    print(f"Shark trajectory distance: {shark_cost}")
     print(f"The number of time steps with the AUV in the shark disk: {time_in_disk}.")
     print(f"The number of time steps in total: {len(total_traj)}.")
     print(f"The percent of time steps within the disk: {time_in_disk / len(total_traj)}.")
     plot_traj(total_traj, total_traj, objects, walls, shark, list_of_goal_points, shark_traj)
-    animationAll(total_traj, shark_traj)
+    animationAll(total_traj, shark_traj, objects, shark)
+   
 
 
 
