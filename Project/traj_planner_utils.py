@@ -23,7 +23,6 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
         trajectory (list of lists): A list of trajectory points with time, X, Y, Theta (s, m, m, rad).
         traj_distance (float): The length ofthe trajectory (m).
   """
-  
   traj = []
   traj_distance = 0
   
@@ -48,7 +47,10 @@ def construct_dubins_traj(traj_point_0, traj_point_1):
 
     nextPoint = configurations[i+1]
     traj_distance += math.sqrt((nextPoint[0] - tup[0])**2 + (nextPoint[1] - tup[1])**2)
-
+  print(listOfTimes[-1])
+  print(configurations[-1][0])
+  print(configurations[-1][1])
+  print(configurations[-1][2])
   traj.append((listOfTimes[-1], configurations[-1][0], configurations[-1][1], configurations[-1][2]))
   return traj, traj_distance
 

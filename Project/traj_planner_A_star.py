@@ -143,7 +143,6 @@ class A_Star_Planner():
 
     self.desired_state = desired_state
     self.objects = objects
-    self.previous_objects = []
     self.walls = walls
     self.fringe = []
     self.shark = shark
@@ -271,7 +270,7 @@ class A_Star_Planner():
     
     global total_traj_distance
     total_traj_distance = 0
-
+    
     traj = []
     for i in range(1,len(all_states)):
       traj_point_0 = all_states[i-1]
@@ -279,6 +278,8 @@ class A_Star_Planner():
       traj_point_1 = list(traj_point_1)
       traj_point_1[3] = math.atan2(traj_point_1[2]-traj_point_0[2], traj_point_1[1]-traj_point_0[1])
       traj_point_1 = tuple(traj_point_1)
+      print(f"Traj_point0 = {traj_point_0}")
+      print(f"Traj_point1 = {traj_point_1}")
       edge_traj, edge_traj_distance = construct_dubins_traj(traj_point_0, traj_point_1)
       
       total_traj_distance += edge_traj_distance
@@ -291,19 +292,23 @@ class A_Star_Planner():
     global total_traj_distance
     total_traj_distance = 0
 
-    print(f"Previous objects: {previous_objects}")
     all_trajs = []
-    for j in range(len(previous_objects[0][0])):
+    print(f"Here is previous objects: {previous_objects} with len {len(previous_objects)}")
+    #print(f"Here is previous_objects[0]: {previous_objects[0]} with len {len(previous_objects[0])}")
+    for j in range(len(previous_objects[0])):
       states = []
-      for i in range(len(previous_objects[0])):
+      for i in range(len(previous_objects)):
+        print(f"States before: {states}")
         x = previous_objects[i][j][0]
         y = previous_objects[i][j][1]
-        states.append((0, x, y, 0))
-      print(f"States: {states}")
+        states.append((i, x, y, 0))
+        print(f"States after: {states}")
       traj, traj_distance = self.build_shark_traj(states)
       all_trajs.append(traj)
       total_traj_distance += traj_distance
 
+      # print(f"Here are the previous objects: {previous_objects}")
+      #print(f'Here are the states: {states}')
     return all_trajs, total_traj_distance
 
   # changed arguments from starter code collision_found(self, node_1, node_2) to what it is now
@@ -323,10 +328,12 @@ class A_Star_Planner():
 
   def update_objects(self):
     max_change = 1  # m. Both negative and positive
-    self.previous_objects.append(self.objects)
+    #print(f"Here are the objects: {self.objects}")
     for obstacle in self.objects:
       obstacle[0] += random.uniform(-max_change, max_change)
       obstacle[1] += random.uniform(-max_change, max_change)
+    
+    #print(f"Here are the objects after: {self.objects}")
       
 
 if __name__ == '__main__':
@@ -350,6 +357,8 @@ if __name__ == '__main__':
       obj = [random.uniform(-maxR+1, maxR-1), random.uniform(-maxR+1, maxR-1), 0.5]
     objects.append(obj)
 
+  #print("Objects:", objects)
+
   time_in_disk = 0
   total_traj = []
   total_traj_distance = 0
@@ -364,17 +373,24 @@ if __name__ == '__main__':
   
   total_traj+=traj
   list_of_goal_points = []
+
+  previous_objects = []
+  previous_objects.append(objects)
+
   # Call below repeatedly
   for i in range(5):
-    
+    print(f"Objects before: {planner.objects}")
     shark.updateState()
     planner.update_objects()
+    object_list = planner.objects
+    previous_objects.append(object_list)
+    print(f"Objects after: {planner.objects}")
     current_x, current_y, current_theta = shark.state
     current_state = (i, current_x, current_y, current_theta)
     x, y, theta = shark.get_desired_state(current_state)
     tp0 = total_traj[-1]
     tp1 = [tp0[0] + TIME_STEP, x, y, theta]
-    traj, traj_distance = planner.construct_traj(tp0, tp1, objects, walls, shark)
+    traj, traj_distance = planner.construct_traj(tp0, tp1, planner.objects, walls, shark)
     total_traj_distance += traj_distance
 
     for point in traj:
@@ -392,10 +408,12 @@ if __name__ == '__main__':
   time = shark.previous_states[-1][0] + TIME_STEP
   previous_states.append((time, x, y, theta))
 
-  planner.previous_objects.append(planner.objects)
+  
 
   shark_traj, shark_cost = planner.build_shark_traj(previous_states)
-  object_trajs, total_cost = planner.build_object_traj(planner.previous_objects)
+ 
+    
+  object_trajs, total_cost = planner.build_object_traj(previous_objects)
 
   if len(total_traj) > 0:
     print(f"Plan construction time: {end_time - start_time}")
