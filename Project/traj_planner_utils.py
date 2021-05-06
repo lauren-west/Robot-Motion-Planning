@@ -281,7 +281,7 @@ def animationAll(total_traj, shark_traj, objects, shark):
   xsharkdata, ysharkdata = [], [] 
   # cirxdata, cirydata = [], [] 
   # cir3xdata, cir3ydata = [], [] 
-  multiple = len(traj)//len(shark_traj)
+  multiple = math.floor(len(traj)/len(shark_traj) + 0.5)
   
   difference = len(total_traj) - len(shark_traj) * multiple
   
